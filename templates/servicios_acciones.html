@@ -1,0 +1,251 @@
+{% load static %}
+{% load filters %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Servicios - Tech Solutions</title>
+    <link rel="stylesheet" href="{% static 'css/servicios_acciones.css' %}" />
+</head>
+<body>
+    <div class="header">
+        <a href="/home">
+            <img src="{% static 'img/icono_ts.png' %}" alt="IconoTS" class="icon" />
+        </a>
+        <h1>ACCIONES DE SERVICIOS</h1>
+        <a href="{% url 'logout' %}">
+            <img src="{% static 'img/logout_ts.png' %}" alt="LogoutTS" class="icon-right" />
+        </a>
+    </div>
+
+    <div class="content-container">
+        <div class="info-servicios">
+        <h2>Detalle del Servicio</h2>
+        <div class="servicio">
+            <p><strong>ID:</strong> {{ servicio.id }}</p>
+            <p><strong>Marca:</strong> {{ servicio.celular.marca }}</p>
+            <p><strong>Modelo:</strong> {{ servicio.celular.modelo }}</p>
+            <p><strong>Descripción:</strong> {{ servicio.descripcion }}</p>
+            <p><strong>Estado:</strong> {{ servicio.estado|format_estado }}</p>
+            <p><strong>Cotización (sujeta a cambios):</strong> {{ servicio.cotizacion }}</p>
+            <p><strong>Anticipo:</strong> {{ servicio.anticipo }}</p>
+            <p><strong>Total final:</strong> {{ servicio.total }}</p>
+            <p><strong>Saldo pendiente:</strong> {{ servicio.saldo_pendiente }}</p>
+            <div class="button-container">
+                <a href="{% url 'servicios_editar' servicio.id %}" class="button">
+                    <p class="button-text">MODIFICAR</p>
+                </a>
+            </div>
+        </div>
+        <br>
+        <h2>Acciones del Servicio</h2>
+    </div>
+
+    <div class="search-container">
+        <div class="button-container">
+            <a href="{% url 'acciones_registro' servicio.id %}" class="button">
+                <p class="button-text">AGREGAR</p>
+            </a>
+        </div>
+    </div>
+
+    <table>
+        <thead>
+            <tr>
+                <th>Fecha</th>
+                <th>Estado</th>
+                <th>Descripción</th>
+                <th>Costo</th>
+                <th>Empleado</th>
+                <th>Opciones</th>
+            </tr>
+        </thead>
+        <tbody id="tbodyAcciones">
+            {% for accion in acciones %}
+                {% if accion.activo %}
+                    <tr>
+                        <td>{{ accion.fecha }}</td>
+                        <td>{{ accion.estado|format_estado }}</td>
+                        <td>{{ accion.descripcion }}</td>
+                        <td>{{ accion.costo }}</td>
+                        <td>{{ accion.empleado }}</td>
+                        <td class="icon-cell">
+                            <img src="{% static 'img/editar_ts.png' %}" alt="Editar" class="edit-btn" data-servicio-id="{{servicio.id}}" data-accion-id="{{accion.id}}"/>
+                            <img src="{% static 'img/borrar_ts.png' %}" alt="Borrar" class="delete-btn" data-servicio-id="{{servicio.id}}" data-accion-id="{{accion.id}}"/>    
+                        </td>
+                    </tr>
+                {% endif %}
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <div class="modal" id="advertenciaBorrarModal">
+        <div class="modal-content">
+            <div class="top-bar">
+                <span
+                    onclick="cerrarAdvertenciaBorrarModal()"
+                    class="close-button"
+                    >&times;</span
+                >
+            </div>
+            <img
+                src="{% static 'img/advertencia_ts.png' %}"
+                alt="AdvertenciaTS"
+                style="width: 60px; height: 60px; margin-bottom: 1px"
+            />
+            <p
+                id="advertenciaBorrarModalMessage"
+                style="margin-bottom: 20px; font-size: 20px"
+            ></p>
+            <button
+                onclick="cerrarAdvertenciaBorrarModal()"
+                style="margin-top: 10px; margin-right: 4%; margin-left: 4%"
+            >
+                CANCELAR
+            </button>
+            <button
+                id="advertenciaBorrarConfirmar"
+                style="margin-top: 10px; margin-right: 4%; margin-left: 4%"
+            >
+                CONFIRMAR
+            </button>
+        </div>
+    </div>
+
+    <div class="modal" id="exitoBorradoModal">
+        <div class="modal-content">
+            <div class="top-bar">
+                <span
+                    onclick="cerrarExitoBorradoModal()"
+                    class="close-button"
+                    >&times;</span
+                >
+            </div>
+            <img
+                src="{% static 'img/exito_ts.png' %}"
+                alt="ExitoTS"
+                style="width: 60px; height: 60px; margin-bottom: 1px"
+            />
+            <p
+                id="exitoBorradoModalMessage"
+                style="margin-bottom: 20px; font-size: 20px"
+            ></p>
+            <button
+                onclick="cerrarExitoBorradoModal()"
+                style="margin-top: 10px"
+            >
+                ACEPTAR
+            </button>
+        </div>
+    </div>
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+
+    <script>
+        function mostrarModal(
+            mensaje,
+            modalId,
+            mensajeModalId,
+            confirmCallback
+        ) {
+            var modalMessage = document.getElementById(mensajeModalId);
+            modalMessage.innerHTML = mensaje;
+            document.getElementById(modalId).style.display = "flex";
+
+            // Al hacer clic en confirmar, ejecuta la función confirmCallback
+            document.getElementById("advertenciaBorrarConfirmar").onclick =
+                function () {
+                    confirmCallback();
+                    cerrarAdvertenciaBorrarModal();
+                };
+        }
+
+        function cerrarAdvertenciaBorrarModal() {
+            document.getElementById(
+                "advertenciaBorrarModal"
+            ).style.display = "none";
+        }
+
+        function cerrarExitoBorradoModal() {
+            document.getElementById("exitoBorradoModal").style.display =
+                "none";
+            window.location.reload(); 
+        }
+
+        $(document).ready(function () {
+            function getCookie(name) {
+                let cookieValue = null;
+                if (document.cookie && document.cookie !== "") {
+                    const cookies = document.cookie.split(";");
+                    for (let i = 0; i < cookies.length; i++) {
+                        const cookie = cookies[i].trim();
+                        if (
+                            cookie.substring(0, name.length + 1) ===
+                            name + "="
+                        ) {
+                            cookieValue = decodeURIComponent(
+                                cookie.substring(name.length + 1)
+                            );
+                            break;
+                        }
+                    }
+                }
+                return cookieValue;
+            }
+            const csrftoken = getCookie("csrftoken");
+
+            $(document).on("click", ".edit-btn", function () {
+                var accionId = $(this).data("accion-id");
+                if (accionId) {
+                    window.location.href = `/servicios/acciones/modificar/${accionId}/`; // Asegúrate de que la URL termina con una barra '/'
+                } else {
+                    console.error("No se encontró el ID de la acción.");
+                }
+            });
+
+            $(document).on("click", ".delete-btn", function () {
+                var accionId = $(this).data("accion-id");
+                var servicioId = $(this).data("servicio-id");
+                console.log(accionId)
+                
+                mostrarModal(
+                    "<strong>Está a punto de eliminar una acción. ¿Desea continuar?</strong>",
+                    "advertenciaBorrarModal",
+                    "advertenciaBorrarModalMessage",
+                    function () {
+                        if (accionId) {
+                            $.ajax({
+                                url: "{% url 'eliminar_accion' %}",
+                                type: "POST",
+                                data: {
+                                    accion_id: accionId,
+                                    servicio_id: servicioId,
+                                    csrfmiddlewaretoken: csrftoken,
+                                },
+                                success: function (response) {
+                                    if (response.success) {
+                                        mostrarModal(
+                                            "<strong>Acción eliminada exitosamente</strong>",
+                                            "exitoBorradoModal",
+                                            "exitoBorradoModalMessage"
+                                        );
+                                    } else {
+                                    }
+                                },
+                                error: function () {
+                                },
+                            });
+                        } else {
+                            console.error(
+                                "No se encontró el ID de la acción."
+                            );
+                        }
+                    }
+                );
+                
+            });
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,335 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Clientes - Tech Solutions</title>
+        <link rel="stylesheet" href="{% static 'css/clientes_form.css' %}" />
+    </head>
+
+    <body>
+        <div class="header">
+            <a href="/home">
+                <img
+                    src="{% static 'img/icono_ts.png' %}"
+                    alt="IconoTS"
+                    class="icon"
+                />
+            </a>
+            <h1>MODIFICAR CLIENTE</h1>
+            <a href="{% url 'logout' %}">
+                <img
+                    src="{% static 'img/logout_ts.png' %}"
+                    alt="LogoutTS"
+                    class="icon-right"
+                />
+            </a>
+        </div>
+
+        <div class="welcome-container">
+            <p class="subtext">
+                Favor de completar todos los campos
+            </p>
+        </div>
+
+        <div class="formulario">
+            <form
+                id="miFormulario"
+                method="post"
+                action="{% url 'clientes_modificar' cliente.id %}"
+            >
+                {% csrf_token %} {{ form.as_p }}
+                <div class="button-container">
+                    <button type="button" id="cancelarRegistro">CANCELAR</button>
+                    <button type="submit" class="btn">ACTUALIZAR</button>
+                </div>
+            </form>
+        </div>
+
+        <!-- Modals -->
+        <div class="modal" id="advertenciaRegistroModal">
+            <div class="modal-content">
+                <div class="top-bar">
+                    <span
+                        onclick="cerrarAdvertenciaRegistroModal()"
+                        class="close-button"
+                        >&times;</span
+                    >
+                </div>
+                <img
+                    src="{% static 'img/advertencia_ts.png' %}"
+                    alt="AdvertenciaTS"
+                    style="width: 60px; height: 60px; margin-bottom: 1px"
+                />
+                <p
+                    id="advertenciaRegistroModalMessage"
+                    style="margin-bottom: 20px; font-size: 20px"
+                ></p>
+                <button
+                    onclick="cerrarAdvertenciaRegistroModal()"
+                    style="margin-top: 10px; margin-right: 4%; margin-left: 4%"
+                >
+                    CANCELAR
+                </button>
+                <button
+                    id="confirmarAdvertenciaRegistroModal"
+                    style="margin-top: 10px; margin-right: 4%; margin-left: 4%"
+                >
+                    CONFIRMAR
+                </button>
+            </div>
+        </div>
+
+        <div class="modal" id="exitoRegistroModal">
+            <div class="modal-content">
+                <div class="top-bar">
+                    <span
+                        onclick="cerrarExitoRegistroModal()"
+                        class="close-button"
+                        >&times;</span
+                    >
+                </div>
+                <img
+                    src="{% static 'img/exito_ts.png' %}"
+                    alt="ExitoTS"
+                    style="width: 60px; height: 60px; margin-bottom: 1px"
+                />
+                <p
+                    id="exitoRegistroModalMessage"
+                    style="margin-bottom: 20px; font-size: 20px"
+                ></p>
+                <button id="exitoRegistroAceptado" style="margin-top: 10px">
+                    ACEPTAR
+                </button>
+            </div>
+        </div>
+
+        <div class="modal" id="advertenciaCancelarRegistroModal">
+            <div class="modal-content">
+                <div class="top-bar">
+                    <span
+                        onclick="cerrarAdvertenciaCancelarRegistroModal()"
+                        class="close-button"
+                        >&times;</span
+                    >
+                </div>
+                <img
+                    src="{% static 'img/advertencia_ts.png' %}"
+                    alt="AdvertenciaTS"
+                    style="width: 60px; height: 60px; margin-bottom: 1px"
+                />
+                <p
+                    id="advertenciaCancelarRegistroModalMessage"
+                    style="margin-bottom: 20px; font-size: 20px"
+                ></p>
+                <button
+                    onclick="cerrarAdvertenciaCancelarRegistroModal()"
+                    style="margin-top: 10px; margin-right: 4%; margin-left: 4%"
+                >
+                    CANCELAR
+                </button>
+                <button
+                    id="advertenciaCancelarRegistroConfirmado"
+                    style="margin-top: 10px; margin-right: 4%; margin-left: 4%"
+                >
+                    CONFIRMAR
+                </button>
+            </div>
+        </div>
+
+        <div class="modal" id="errorTelefonoModal">
+            <div class="modal-content">
+                <div class="top-bar">
+                    <span
+                        onclick="cerrarErrorTelefonoModal()"
+                        class="close-button"
+                        >&times;</span
+                    >
+                </div>
+                <img
+                    src="{% static 'img/error_ts.png' %}"
+                    alt="ErrorTS"
+                    style="width: 60px; height: 60px; margin-bottom: 1px"
+                />
+                <p
+                    id="errorTelefonoModalMessage"
+                    style="margin-bottom: 20px; font-size: 20px"
+                ></p>
+                <button
+                    onclick="cerrarErrorTelefonoModal()"
+                    style="margin-top: 10px; margin-right: 4%; margin-left: 4%"
+                >
+                    ACEPTAR
+                </button>
+            </div>
+        </div>
+
+        <div class="modal" id="errorCorreoModal">
+            <div class="modal-content">
+                <div class="top-bar">
+                    <span
+                        onclick="cerrarErrorCorreoModal()"
+                        class="close-button"
+                        >&times;</span
+                    >
+                </div>
+                <img
+                    src="{% static 'img/error_ts.png' %}"
+                    alt="ErrorTS"
+                    style="width: 60px; height: 60px; margin-bottom: 1px"
+                />
+                <p
+                    id="errorCorreoModalMessage"
+                    style="margin-bottom: 20px; font-size: 20px"
+                ></p>
+                <button
+                    onclick="cerrarErrorCorreoModal()"
+                    style="margin-top: 10px; margin-right: 4%; margin-left: 4%"
+                >
+                    ACEPTAR
+                </button>
+            </div>
+        </div>
+
+        <script>
+            document.addEventListener("DOMContentLoaded", function () {
+                var telefonoInput = document.getElementById("id_num_telefono");
+                var correoInput = document.getElementById("id_correo");
+
+                telefonoInput.addEventListener("input", function () {
+                    // Remover cualquier caracter que no sea un número
+                    this.value = this.value.replace(/\D/g, "");
+
+                    // Limitar la longitud del número de teléfono a 10 dígitos
+                    if (this.value.length > 10) {
+                        this.value = this.value.slice(0, 10);
+                    }
+                });
+
+                document.getElementById("miFormulario").addEventListener("submit", function (event) {
+                    var telefonoValue = telefonoInput.value.trim();
+                    var correoValue = correoInput.value.trim();
+                    var emailRegex = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$/;
+
+                    // Verificar si el campo del teléfono tiene exactamente 10 dígitos
+                    if (telefonoValue.length !== 10) {
+                        event.preventDefault(); // Evitar que se envíe el formulario si la validación falla
+                        mostrarModal(
+                            "<strong>El número de teléfono debe tener exactamente 10 dígitos.</strong>",
+                            "errorTelefonoModal",
+                            "errorTelefonoModalMessage"
+                        );
+                        return; // Detener la ejecución del script aquí
+                    }
+
+                    // Verificar si el correo electrónico es válido
+                    if (!emailRegex.test(correoValue)) {
+                        event.preventDefault(); // Evitar que se envíe el formulario si la validación falla
+                        mostrarModal(
+                            "<strong>Por favor, ingrese un correo electrónico válido.</strong>",
+                            "errorCorreoModal",
+                            "errorCorreoModalMessage"
+                        );
+                        return; // Detener la ejecución del script aquí
+                    }
+
+                    // Si la validación pasa, mostrar el modal de advertencia
+                    event.preventDefault();
+                    mostrarModal(
+                        "<strong>Está a punto de actualizar la información de un cliente. ¿Desea continuar?</strong>",
+                        "advertenciaRegistroModal",
+                        "advertenciaRegistroModalMessage"
+                    );
+                });
+
+                var confirmarAdvertenciaRegistroModalButton = document.getElementById("confirmarAdvertenciaRegistroModal");
+                confirmarAdvertenciaRegistroModalButton.addEventListener("click", function () {
+                    cerrarAdvertenciaRegistroModal();
+                    guardarRegistroCliente();
+                    mostrarModal(
+                        "<strong>Información del cliente actualizada exitosamente.</strong>",
+                        "exitoRegistroModal",
+                        "exitoRegistroModalMessage"
+                    );
+                });
+
+                var exitoRegistroAceptadoButton = document.getElementById("exitoRegistroAceptado");
+                exitoRegistroAceptadoButton.addEventListener("click", function () {
+                    window.location.href = "/clientes/";
+                });
+
+                var cancelarRegistroButton = document.getElementById("cancelarRegistro");
+                cancelarRegistroButton.addEventListener("click", function () {
+                    mostrarModal(
+                        "<strong>Está a punto de cancelar esta operación. ¿Desea continuar?</strong>",
+                        "advertenciaCancelarRegistroModal",
+                        "advertenciaCancelarRegistroModalMessage"
+                    );
+                });
+
+                var advertenciaCancelarRegistroConfirmadoButton = document.getElementById("advertenciaCancelarRegistroConfirmado");
+                advertenciaCancelarRegistroConfirmadoButton.addEventListener("click", function () {
+                    window.location.href = "/clientes";
+                });
+            });
+
+            function mostrarModal(mensaje, modalId, mensajeModalId) {
+                var modalMessage = document.getElementById(mensajeModalId);
+                modalMessage.innerHTML = mensaje;
+                document.getElementById(modalId).style.display = "flex";
+            }
+
+            function cerrarExitoRegistroModal() {
+                window.location.href = "/clientes/";
+            }
+
+            function cerrarAdvertenciaRegistroModal() {
+                document.getElementById("advertenciaRegistroModal").style.display = "none";
+            }
+
+            function cerrarAdvertenciaCancelarRegistroModal() {
+                document.getElementById("advertenciaCancelarRegistroModal").style.display = "none";
+            }
+
+            function cerrarErrorTelefonoModal() {
+                document.getElementById("errorTelefonoModal").style.display = "none";
+            }
+
+            function cerrarErrorCorreoModal() {
+                document.getElementById("errorCorreoModal").style.display = "none";
+            }
+
+            function getCookie(name) {
+                let cookieValue = null;
+                if (document.cookie && document.cookie !== '') {
+                    const cookies = document.cookie.split(';');
+                    for (let i = 0; i < cookies.length; i++) {
+                        const cookie = cookies[i].trim();
+                        if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                            cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                            break;
+                        }
+                    }
+                }
+                return cookieValue;
+            }
+
+            function guardarRegistroCliente() {
+                var clienteId = {{ cliente.id }};
+                var form = document.getElementById("miFormulario");
+                var formData = new FormData(form);
+                var xhr = new XMLHttpRequest();
+                xhr.open("POST", "{{ form.action }}", true);
+                xhr.setRequestHeader("X-CSRFToken", getCookie('csrftoken'));
+                xhr.onreadystatechange = function () {
+                    if (xhr.readyState == 4 && xhr.status == 200) {
+                        window.location.href = "/clientes/";
+                    } else if (xhr.readyState == 4 && xhr.status != 200) {
+                    }
+                };
+                xhr.send(formData);
+            }
+        </script>
+    </body>
+</html>

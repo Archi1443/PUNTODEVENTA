@@ -1,0 +1,158 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Empleados - Tech Solutions</title>
+    <link rel="stylesheet" href="{% static 'css/clientes_form.css' %}">
+    <style>
+        .error-message {
+            color: red;
+            font-size: 14px;
+            margin-top: 5px;
+        }
+        .is-invalid {
+            border-color: red;
+        }
+        h3 {
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <a href="/home">
+            <img src="{% static 'img/icono_ts.png' %}" alt="Icono Tech Solutions" class="icon">
+        </a>
+        <h1>MODIFICAR EMPLEADO</h1>
+        <a href="{% url 'logout' %}">
+            <img src="{% static 'img/logout_ts.png' %}" alt="LogoutTS" class="icon-right" />
+        </a>
+    </div>
+
+    <div class="welcome-container">
+        <p class="subtext">
+            Favor de completar todos los campos
+        </p>
+    </div>
+
+    <div class="formulario">
+        <h3>Actualizar datos del empleado</h3>
+        <form id="miFormulario" method="post" action="{% url 'modificar_datos_empleado' empleado.id %}">
+            {% csrf_token %}
+            {{ form.as_p }}
+            <div class="button-container">
+                <button type="button" id="cancelarRegistro">CANCELAR</button>
+                <button type="submit">ACTUALIZAR</button>
+            </div>
+        </form>
+    </div>
+
+    <div class="modal" id="advertenciaModificarModal">
+        <div class="modal-content">
+            <div class="top-bar">
+                <span onclick="cerrarAdvertenciaModificarModal()" class="close-button">&times;</span>
+            </div>
+            <img src="{% static 'img/advertencia_ts.png' %}" alt="AdvertenciaTS" style="width: 60px; height: 60px; margin-bottom: 1px" />
+            <p id="advertenciaModificarModalMessage" style="margin-bottom: 20px; font-size: 20px"></p>
+            <button onclick="cerrarAdvertenciaModificarModal()" style="margin-top: 10px; margin-right: 4%; margin-left: 4%">CANCELAR</button>
+            <button id="confirmarAdvertenciaModificarModal" style="margin-top: 10px; margin-right: 4%; margin-left: 4%">ACTUALIZAR</button>
+        </div>
+    </div>
+
+    <div class="modal" id="exitoModificarModal">
+        <div class="modal-content">
+            <div class="top-bar">
+                <span
+                    onclick="cerrarExitoModificarModal()"
+                    class="close-button"
+                    >&times;</span
+                >
+            </div>
+            <img
+                src="{% static 'img/exito_ts.png' %}"
+                alt="ExitoTS"
+                style="width: 60px; height: 60px; margin-bottom: 1px"
+            />
+            <p
+                id="exitoModificarModalMessage"
+                style="margin-bottom: 20px; font-size: 20px"
+            ></p>
+            <button onclick="cerrarExitoModificarModal()" style="margin-top: 10px; margin-right: 4%; margin-left: 4%">
+                ACEPTAR
+            </button>
+        </div>
+    </div>
+
+    <div class="modal" id="advertenciaCancelarRegistroModal">
+        <div class="modal-content">
+            <div class="top-bar">
+                <span onclick="cerrarAdvertenciaCancelarRegistroModal()" class="close-button">&times;</span>
+            </div>
+            <img src="{% static 'img/advertencia_ts.png' %}" alt="AdvertenciaTS" style="width: 60px; height: 60px; margin-bottom: 1px" />
+            <p id="advertenciaCancelarRegistroModalMessage" style="margin-bottom: 20px; font-size: 20px"></p>
+            <button onclick="cerrarAdvertenciaCancelarRegistroModal()" style="margin-top: 10px; margin-right: 4%; margin-left: 4%">CANCELAR</button>
+            <button id="advertenciaCancelarRegistroConfirmado" style="margin-top: 10px; margin-right: 4%; margin-left: 4%">CONFIRMAR</button>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            document.getElementById("miFormulario").addEventListener("submit", function (event) {                    event.preventDefault();
+                mostrarModal(
+                    "<strong>Está a punto de actualizar los datos de un empleado. ¿Desea continuar?</strong>",
+                    "advertenciaModificarModal",
+                    "advertenciaModificarModalMessage"
+                );
+            });
+
+            var confirmarAdvertenciaModificarModalButton = document.getElementById("confirmarAdvertenciaModificarModal");
+                confirmarAdvertenciaModificarModalButton.addEventListener("click", function () {
+                cerrarAdvertenciaModificarModal();
+                document.getElementById("miFormulario").submit();
+                /*
+                mostrarModal(
+                    "<strong>Datos del empleado actualizados exitosamente.</strong>",
+                    "exitoModificarModal",
+                    "exitoModificarModalMessage"
+                );
+                */
+            });
+
+            var cancelarRegistroButton = document.getElementById("cancelarRegistro");
+            cancelarRegistroButton.addEventListener("click", function () {
+                mostrarModal(
+                    "<strong>Está a punto de cancelar esta operación. ¿Desea continuar?</strong>",
+                    "advertenciaCancelarRegistroModal",
+                    "advertenciaCancelarRegistroModalMessage"
+                );
+            });
+
+            var advertenciaCancelarRegistroConfirmadoButton = document.getElementById("advertenciaCancelarRegistroConfirmado");
+            advertenciaCancelarRegistroConfirmadoButton.addEventListener("click", function () {
+                window.location.href = "/empleados";
+            });
+        });
+
+        function mostrarModal(mensaje, modalId, mensajeModalId) {
+            var modalMessage = document.getElementById(mensajeModalId);
+            modalMessage.innerHTML = mensaje;
+            document.getElementById(modalId).style.display = "flex";
+        }
+
+        function cerrarAdvertenciaModificarModal() {
+            document.getElementById("advertenciaModificarModal").style.display = "none";
+        }
+
+        function cerrarExitoModificarModal() {
+            document.getElementById("exitoModificarModal").style.display = "none";
+        }
+
+        function cerrarAdvertenciaCancelarRegistroModal() {
+            document.getElementById("advertenciaCancelarRegistroModal").style.display = "none";
+        }
+    </script>
+</body>
+</html>

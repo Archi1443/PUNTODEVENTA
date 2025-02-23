@@ -1,0 +1,229 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Servicios - Tech Solutions</title>
+    <link rel="stylesheet" href="{% static 'css/servicios_form.css' %}">
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: Calibri, sans-serif;
+            background-color: #f1f3f3;
+        }
+
+        .header {
+            background-color: #333;
+            color: white;
+            padding: 10px;
+            text-align: center;
+        }
+
+        .info-cliente {
+            margin: 20px;
+            padding: 10px;
+            background-color: #f2f2f2;
+            border-radius: 10px;
+        }
+
+        .info-cliente {
+            text-align: center;
+            font-size: 20px;
+        }
+
+        .info-servicios {
+            text-align: center;
+            margin: 0 auto;
+            max-width: 800px; /* Ajusta el ancho máximo según tu diseño */
+        }
+
+        .servicio {
+            text-align: left; /* Alineación del texto a la izquierda dentro del contenedor del servicio */
+            padding: 20px;
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .proceso-txt {
+            text-align: center;
+            font-size: 25px;
+        }
+
+        #qr-code {
+            width: 200px;
+            height: 200px;
+            margin: 20px auto;
+            display: block;
+        }
+
+        .acciones-fotos {
+            margin-top: 20px;
+        }
+
+        .accion-par {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 20px;
+        }
+
+        .accion-foto {
+            width: calc(50% - 10px);
+            box-sizing: border-box;
+        }
+
+        .accion-foto h3 {
+            margin-top: 0;
+        }
+
+        .accion-foto img {
+            width: 100%;
+            height: auto;
+            max-width: 100%;
+        }
+
+        #print-button {
+            display: block;
+            width: 200px;
+            margin: 20px auto;
+            padding: 10px;
+            background-color: #343ba8;
+            color: white;
+            text-align: center;
+            border: none;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: bold;
+        }
+
+        @media print {
+            body * {
+                visibility: hidden;
+            }
+
+            .print-area, .print-area * {
+                visibility: visible;
+            }
+
+            .print-area {
+                position: absolute;
+                left: 0;
+                top: 0;
+                width: 100%;
+                padding: 20px;
+                box-sizing: border-box;
+            }
+
+            .header {
+                background-color: #333 !important;
+                color: white !important;
+                padding: 10px;
+                text-align: center;
+                margin-bottom: 20px;
+                position: relative;
+            }
+
+            .info-cliente, .info-servicios {
+                margin: 20px;
+                padding: 10px;
+                background-color: #f2f2f2;
+                border-radius: 10px;
+            }
+
+            a[href]:after {
+                content: none !important;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="header">
+        <a href="/home"><img src="{% static 'img/icono_ts.png' %}" alt="IconoTS" class="icon"></a>
+        <h1>CONSULTA DE SERVICIOS</h1>
+        <a href="{% url 'logout' %}">
+            <img src="{% static 'img/logout_ts.png' %}" alt="LogoutTS" class="icon-right" />
+        </a>
+    </div>
+
+    <div class="print-area">
+        <div class="info-cliente">
+            <h2>Información del Cliente</h2>
+            <p><strong>Cliente:</strong> {{ servicio.cliente.nombre }} {{ servicio.cliente.apellidos }}</p>
+            <p><strong>Número de Teléfono:</strong> {{ servicio.cliente.num_telefono }}</p>
+            <p><strong>Correo:</strong> {{ servicio.cliente.correo }}</p>
+        </div>
+
+        <div class="info-servicios">
+            <h2>Detalle del Servicio</h2>
+            <div class="servicio">
+                <p><strong>ID:</strong> {{ servicio.id }}</p>
+                <p><strong>Marca:</strong> {{ servicio.celular.marca }}</p>
+                <p><strong>Modelo:</strong> {{ servicio.celular.modelo }}</p>
+                <p><strong>Descripción:</strong> {{ servicio.descripcion }}</p>
+                <p><strong>Estado:</strong> {{ servicio.get_estado_display }}</p>
+                <p><strong>Cotización (sujeta a cambios):</strong> {{ servicio.cotizacion }}</p>
+                <p><strong>Total final:</strong> {{ servicio.total }}</p>
+                <p><strong>Anticipo:</strong> {{ servicio.anticipo }}</p>
+                <p><strong>Saldo pendiente:</strong> {{ servicio.saldo_pendiente }}</p>
+            </div>
+
+            <br>
+            <h2>Acciones del Servicio</h2>
+
+            <div class="acciones-fotos">
+                {% for accion in acciones %}
+                    {% if accion.activo %}
+                        <p class="proceso-txt"><strong>Proceso realizado:</strong> {{ accion.descripcion }}</p>
+                        <p class="proceso-txt">El {{accion.fecha}} por {{accion.empleado}}</p>
+                        <div class="accion-par">
+                            {% if accion.foto_antes %}
+                            <div class="accion-foto">
+                                <div>
+                                    <h3>Foto Antes</h3>
+                                    <img src="{{ accion.foto_antes.url }}" alt="Foto antes de la acción">
+                                </div>
+                            </div>
+                            {% endif %}
+                            {% if accion.foto_despues %}
+                            <div class="accion-foto">
+                                <div>
+                                    <h3>Foto Después</h3>
+                                    <img src="{{ accion.foto_despues.url }}" alt="Foto después de la acción">
+                                </div>
+                            </div>
+                            {% endif %}
+                        </div>
+                    {% endif %}
+                {% endfor %}
+            </div>
+
+            <div id="qr-code"></div>
+        </div>
+    </div>
+
+    <button id="print-button" onclick="window.print()">IMPRIMIR</button>
+
+    <script>
+        // Obtener la URL actual
+        var currentUrl = window.location.href;
+        console.log("URL actual:", currentUrl); // Agrega un console.log para verificar la URL
+
+        // Generar la URL de la API para generar el código QR
+        var apiUrl = "https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=" + encodeURIComponent(currentUrl);
+
+        // Crear la imagen del código QR y agregarla al contenedor
+        var qrImage = new Image();
+        qrImage.src = apiUrl;
+        qrImage.width = 200;
+        qrImage.height = 200;
+        document.getElementById("qr-code").appendChild(qrImage);
+    </script>
+
+</body>
+
+</html>

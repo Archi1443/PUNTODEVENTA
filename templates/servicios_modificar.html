@@ -1,0 +1,292 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="es">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Servicios - Tech Solutions</title>
+        <link rel="stylesheet" href="{% static 'css/servicios_form.css' %}" />
+    </head>
+
+    <body>
+        <div class="header">
+            <a href="/home"
+                ><img
+                    src="{% static 'img/icono_ts.png' %}"
+                    alt="IconoTS"
+                    class="icon"
+            /></a>
+            <h1>MODIFICAR SERVICIOS</h1>
+            <a href="{% url 'logout' %}">
+                <img
+                    src="{% static 'img/logout_ts.png' %}"
+                    alt="LogoutTS"
+                    class="icon-right"
+                />
+            </a>
+        </div>
+
+        <div class="welcome-container">
+            <p class="subtext">Favor de completar todos los campos</p>
+        </div>
+
+        <div class="formulario">
+            <form id="miFormulario" method="post">
+                {% csrf_token %} {{ form.as_p }}
+                <div class="button-container">
+                    <button
+                        id="cancelarRegistro"
+                        type="button"
+                        class="cancelar"
+                    >
+                        CANCELAR
+                    </button>
+                    <button type="submit">ACTUALIZAR</button>
+                </div>
+            </form>
+        </div>
+
+        <!-- Modals -->
+        <div class="modal" id="errorIMEIModal">
+            <div class="modal-content">
+                <div class="top-bar">
+                    <span onclick="cerrarErrorIMEIModal()" class="close-button"
+                        >&times;</span
+                    >
+                </div>
+                <img
+                    src="{% static 'img/error_ts.png' %}"
+                    alt="ErrorTS"
+                    style="width: 60px; height: 60px; margin-bottom: 1px"
+                />
+                <p
+                    id="errorIMEIModalMessage"
+                    style="margin-bottom: 20px; font-size: 20px"
+                ></p>
+                <button
+                    onclick="cerrarErrorIMEIModal()"
+                    style="margin-top: 10px; margin-right: 4%; margin-left: 4%"
+                >
+                    ACEPTAR
+                </button>
+            </div>
+        </div>
+
+        <div class="modal" id="advertenciaRegistroModal">
+            <div class="modal-content">
+                <div class="top-bar">
+                    <span
+                        onclick="cerrarAdvertenciaRegistroModal()"
+                        class="close-button"
+                        >&times;</span
+                    >
+                </div>
+                <img
+                    src="{% static 'img/advertencia_ts.png' %}"
+                    alt="AdvertenciaTS"
+                    style="width: 60px; height: 60px; margin-bottom: 1px"
+                />
+                <p
+                    id="advertenciaRegistroModalMessage"
+                    style="margin-bottom: 20px; font-size: 20px"
+                ></p>
+                <button
+                    onclick="cerrarAdvertenciaRegistroModal()"
+                    style="margin-top: 10px; margin-right: 4%; margin-left: 4%"
+                >
+                    CANCELAR
+                </button>
+                <button
+                    id="confirmarAdvertenciaRegistroModal"
+                    style="margin-top: 10px; margin-right: 4%; margin-left: 4%"
+                >
+                    CONFIRMAR
+                </button>
+            </div>
+        </div>
+
+        <div class="modal" id="exitoRegistroModal">
+            <div class="modal-content">
+                <div class="top-bar">
+                    <span
+                        onclick="cerrarExitoRegistroModal()"
+                        class="close-button"
+                        >&times;</span
+                    >
+                </div>
+                <img
+                    src="{% static 'img/exito_ts.png' %}"
+                    alt="ExitoTS"
+                    style="width: 60px; height: 60px; margin-bottom: 1px"
+                />
+                <p
+                    id="exitoRegistroModalMessage"
+                    style="margin-bottom: 20px; font-size: 20px"
+                ></p>
+                <button id="exitoRegistroAceptado" style="margin-top: 10px">
+                    ACEPTAR
+                </button>
+            </div>
+        </div>
+
+        <div class="modal" id="advertenciaCancelarRegistroModal">
+            <div class="modal-content">
+                <div class="top-bar">
+                    <span
+                        onclick="cerrarAdvertenciaCancelarRegistroModal()"
+                        class="close-button"
+                        >&times;</span
+                    >
+                </div>
+                <img
+                    src="{% static 'img/advertencia_ts.png' %}"
+                    alt="AdvertenciaTS"
+                    style="width: 60px; height: 60px; margin-bottom: 1px"
+                />
+                <p
+                    id="advertenciaCancelarRegistroModalMessage"
+                    style="margin-bottom: 20px; font-size: 20px"
+                ></p>
+                <button
+                    onclick="cerrarAdvertenciaCancelarRegistroModal()"
+                    style="margin-top: 10px; margin-right: 4%; margin-left: 4%"
+                >
+                    CANCELAR
+                </button>
+                <button
+                    id="advertenciaCancelarRegistroConfirmado"
+                    style="margin-top: 10px; margin-right: 4%; margin-left: 4%"
+                >
+                    CONFIRMAR
+                </button>
+            </div>
+        </div>
+
+        <div class="modal" id="errorIMEIModal">
+            <div class="modal-content">
+                <div class="top-bar">
+                    <span onclick="cerrarErrorIMEIModal()" class="close-button"
+                        >&times;</span
+                    >
+                </div>
+                <img
+                    src="{% static 'img/error_ts.png' %}"
+                    alt="ErrorTS"
+                    style="width: 60px; height: 60px; margin-bottom: 1px"
+                />
+                <p
+                    id="errorIMEIModalMessage"
+                    style="margin-bottom: 20px; font-size: 20px"
+                ></p>
+                <button
+                    onclick="cerrarErrorIMEIModal()"
+                    style="margin-top: 10px; margin-right: 4%; margin-left: 4%"
+                >
+                    ACEPTAR
+                </button>
+            </div>
+        </div>
+
+        <script>
+            document.addEventListener("DOMContentLoaded", function () {
+                var imeiInput = document.getElementById("id_imei");
+
+                imeiInput.addEventListener("input", function () {
+                    this.value = this.value.replace(/\D/g, ""); // Asegura que sólo se ingresen números
+                    if (this.value.length > 15) {
+                        this.value = this.value.slice(0, 15); // Limita a 15 caracteres
+                    }
+                });
+
+                document
+                    .getElementById("miFormulario")
+                    .addEventListener("submit", function (event) {
+                        var imeiValue = imeiInput.value.trim();
+                        if (imeiValue.length !== 15) {
+                            event.preventDefault();
+                            mostrarModal(
+                                "<strong>El IMEI debe tener exactamente 15 dígitos numéricos.</strong>",
+                                "errorIMEIModal",
+                                "errorIMEIModalMessage"
+                            );
+                            return;
+                        }
+
+                        event.preventDefault();
+                        mostrarModal(
+                            "<strong>Está a punto de modificar un servicio. ¿Desea continuar?</strong>",
+                            "advertenciaRegistroModal",
+                            "advertenciaRegistroModalMessage"
+                        );
+                    });
+
+                document
+                    .getElementById("confirmarAdvertenciaRegistroModal")
+                    .addEventListener("click", function () {
+                        cerrarAdvertenciaRegistroModal();
+                        guardarRegistroServicio();
+                        mostrarModal(
+                            "<strong>Servicio modificado exitosamente.</strong>",
+                            "exitoRegistroModal",
+                            "exitoRegistroModalMessage"
+                        );
+                    });
+
+                document
+                    .getElementById("exitoRegistroAceptado")
+                    .addEventListener("click", function () {
+                        window.location.href = "/servicios";
+                    });
+
+                document
+                    .getElementById("cancelarRegistro")
+                    .addEventListener("click", function () {
+                        mostrarModal(
+                            "<strong>Está a punto de cancelar esta operación. ¿Desea continuar?</strong>",
+                            "advertenciaCancelarRegistroModal",
+                            "advertenciaCancelarRegistroModalMessage"
+                        );
+                    });
+
+                document
+                    .getElementById("advertenciaCancelarRegistroConfirmado")
+                    .addEventListener("click", function () {
+                        window.location.href = "/servicios/";
+                    });
+            });
+
+            function mostrarModal(mensaje, modalId, mensajeModalId) {
+                var modalMessage = document.getElementById(mensajeModalId);
+                modalMessage.innerHTML = mensaje;
+                document.getElementById(modalId).style.display = "flex";
+            }
+
+            function cerrarAdvertenciaRegistroModal() {
+                document.getElementById(
+                    "advertenciaRegistroModal"
+                ).style.display = "none";
+            }
+
+            function cerrarErrorIMEIModal() {
+                document.getElementById("errorIMEIModal").style.display =
+                    "none";
+            }
+
+            function guardarRegistroServicio() {
+                var form = document.getElementById("miFormulario");
+                var formData = new FormData(form);
+                var xhr = new XMLHttpRequest();
+                xhr.open("POST", form.action, true);
+                xhr.onload = function () {
+                    if (xhr.status === 200) {
+                        // Procesar la respuesta del servidor aquí, por ejemplo, mostrar el modal de éxito si todo está correcto
+                    } else {
+                        // Mostrar algún mensaje de error si la petición no fue exitosa
+                    }
+                };
+                xhr.send(formData);
+            }
+        </script>
+    </body>
+</html>

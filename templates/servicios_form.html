@@ -1,0 +1,461 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="es">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Servicios - Tech Solutions</title>
+        <link rel="stylesheet" href="{% static 'css/servicios_form.css' %}" />
+    </head>
+
+    <body>
+        <div class="header">
+            <a href="/home"
+                ><img
+                    src="{% static 'img/icono_ts.png' %}"
+                    alt="IconoTS"
+                    class="icon"
+            /></a>
+            <h1>REGISTRO DE SERVICIOS</h1>
+            <a href="{% url 'logout' %}">
+                <img
+                    src="{% static 'img/logout_ts.png' %}"
+                    alt="LogoutTS"
+                    class="icon-right"
+                />
+            </a>
+        </div>
+
+        <div class="welcome-container">
+            <p class="subtext">Favor de completar todos los campos</p>
+        </div>
+
+        <div class="formulario">
+            <div class="button-container">
+                <div class="cliente-no-registrado">¿Cliente no registrado?</div>
+                <button id="registrarCliente">REGISTRAR CLIENTE</button>
+            </div>
+
+            <form id="miFormulario" method="post">
+                {% csrf_token %}
+                <div class="form-group">
+                    {{ form.num_telefono.label_tag }} {{ form.num_telefono }}
+                </div>
+
+                <div id="datosCliente" class="form-group hidden">
+                    <label for="cliente">Cliente:</label>
+                    <input type="text" id="cliente" name="cliente" readonly />
+                </div>
+                <div class="button-container">
+                    <button id="buscarCliente" type="button">
+                        BUSCAR CLIENTE
+                    </button>
+                </div>
+
+                <div class="form-group">
+                    {{ form.imei.label_tag }} {{ form.imei }}
+                </div>
+                <div class="form-group">
+                    {{ form.marca.label_tag }} {{ form.marca }}
+                </div>
+                <div class="form-group">
+                    {{ form.modelo.label_tag }} {{ form.modelo }}
+                </div>
+                <div class="form-group">
+                    {{ form.clave_desbloqueo.label_tag }} {{ form.clave_desbloqueo }}
+                </div>
+                <div class="form-group">
+                    {{ form.descripcion.label_tag }} {{ form.descripcion }}
+                </div>
+                <div class="form-group">
+                    {{ form.cotizacion.label_tag }} {{ form.cotizacion }}
+                </div>
+                <div class="form-group">
+                    {{ form.anticipo.label_tag }} {{ form.anticipo }}
+                </div>
+                <div class="button-container">
+                    <button
+                        id="cancelarRegistro"
+                        type="button"
+                        class="cancelar"
+                    >
+                        CANCELAR
+                    </button>
+                    <button type="submit">REGISTRAR</button>
+                </div>
+            </form>
+        </div>
+
+        <!-- Modals -->
+        <div class="modal" id="advertenciaRegistroModal">
+            <div class="modal-content">
+                <div class="top-bar">
+                    <span
+                        onclick="cerrarAdvertenciaRegistroModal()"
+                        class="close-button"
+                        >&times;</span
+                    >
+                </div>
+                <img
+                    src="{% static 'img/advertencia_ts.png' %}"
+                    alt="AdvertenciaTS"
+                    style="width: 60px; height: 60px; margin-bottom: 1px"
+                />
+                <p
+                    id="advertenciaRegistroModalMessage"
+                    style="margin-bottom: 20px; font-size: 20px"
+                ></p>
+                <button
+                    onclick="cerrarAdvertenciaRegistroModal()"
+                    style="margin-top: 10px; margin-right: 4%; margin-left: 4%"
+                >
+                    CANCELAR
+                </button>
+                <button
+                    id="confirmarAdvertenciaRegistroModal"
+                    style="margin-top: 10px; margin-right: 4%; margin-left: 4%"
+                >
+                    CONFIRMAR
+                </button>
+            </div>
+        </div>
+
+        <div class="modal" id="exitoRegistroModal">
+            <div class="modal-content">
+                <div class="top-bar">
+                    <span
+                        onclick="cerrarExitoRegistroModal()"
+                        class="close-button"
+                        >&times;</span
+                    >
+                </div>
+                <img
+                    src="{% static 'img/exito_ts.png' %}"
+                    alt="ExitoTS"
+                    style="width: 60px; height: 60px; margin-bottom: 1px"
+                />
+                <p
+                    id="exitoRegistroModalMessage"
+                    style="margin-bottom: 20px; font-size: 20px"
+                ></p>
+                <button id="exitoRegistroAceptado" style="margin-top: 10px">
+                    ACEPTAR
+                </button>
+            </div>
+        </div>
+
+        <div class="modal" id="advertenciaCancelarRegistroModal">
+            <div class="modal-content">
+                <div class="top-bar">
+                    <span
+                        onclick="cerrarAdvertenciaCancelarRegistroModal()"
+                        class="close-button"
+                        >&times;</span
+                    >
+                </div>
+                <img
+                    src="{% static 'img/advertencia_ts.png' %}"
+                    alt="AdvertenciaTS"
+                    style="width: 60px; height: 60px; margin-bottom: 1px"
+                />
+                <p
+                    id="advertenciaCancelarRegistroModalMessage"
+                    style="margin-bottom: 20px; font-size: 20px"
+                ></p>
+                <button
+                    onclick="cerrarAdvertenciaCancelarRegistroModal()"
+                    style="margin-top: 10px; margin-right: 4%; margin-left: 4%"
+                >
+                    CANCELAR
+                </button>
+                <button
+                    id="advertenciaCancelarRegistroConfirmado"
+                    style="margin-top: 10px; margin-right: 4%; margin-left: 4%"
+                >
+                    CONFIRMAR
+                </button>
+            </div>
+        </div>
+
+        <div class="modal" id="errorTelefonoModal">
+            <div class="modal-content">
+                <div class="top-bar">
+                    <span
+                        onclick="cerrarErrorTelefonoModal()"
+                        class="close-button"
+                        >&times;</span
+                    >
+                </div>
+                <img
+                    src="{% static 'img/error_ts.png' %}"
+                    alt="ErrorTS"
+                    style="width: 60px; height: 60px; margin-bottom: 1px"
+                />
+                <p
+                    id="errorTelefonoModalMessage"
+                    style="margin-bottom: 20px; font-size: 20px"
+                ></p>
+                <button
+                    onclick="cerrarErrorTelefonoModal()"
+                    style="margin-top: 10px; margin-right: 4%; margin-left: 4%"
+                >
+                    ACEPTAR
+                </button>
+            </div>
+        </div>
+
+        <div class="modal" id="errorIMEIModal">
+            <div class="modal-content">
+                <div class="top-bar">
+                    <span onclick="cerrarErrorIMEIModal()" class="close-button"
+                        >&times;</span
+                    >
+                </div>
+                <img
+                    src="{% static 'img/error_ts.png' %}"
+                    alt="ErrorTS"
+                    style="width: 60px; height: 60px; margin-bottom: 1px"
+                />
+                <p
+                    id="errorIMEIModalMessage"
+                    style="margin-bottom: 20px; font-size: 20px"
+                ></p>
+                <button
+                    onclick="cerrarErrorIMEIModal()"
+                    style="margin-top: 10px; margin-right: 4%; margin-left: 4%"
+                >
+                    ACEPTAR
+                </button>
+            </div>
+        </div>
+
+        <script>
+            document.addEventListener("DOMContentLoaded", function () {
+                var telefonoInput = document.getElementById("id_num_telefono");
+                var imeiInput = document.getElementById("id_imei");
+
+                telefonoInput.addEventListener("input", function () {
+                    // Remover cualquier caracter que no sea un número
+                    this.value = this.value.replace(/\D/g, "");
+
+                    // Limitar la longitud del número de teléfono a 10 dígitos
+                    if (this.value.length > 10) {
+                        this.value = this.value.slice(0, 10);
+                    }
+                });
+
+                imeiInput.addEventListener("input", function () {
+                    this.value = this.value.replace(/\D/g, "");
+
+                    if (this.value.length > 15) {
+                        this.value = this.value.slice(0, 15);
+                    }
+                });
+
+                document
+                    .getElementById("miFormulario")
+                    .addEventListener("submit", function (event) {
+                        var telefonoValue = telefonoInput.value.trim();
+                        // Verificar si el campo del teléfono tiene exactamente 10 dígitos
+                        if (telefonoValue.length !== 10) {
+                            event.preventDefault(); // Evitar que se envíe el formulario si la validación falla
+                            mostrarModal(
+                                "<strong>El número de teléfono debe tener exactamente 10 dígitos.</strong>",
+                                "errorTelefonoModal",
+                                "errorTelefonoModalMessage"
+                            );
+                            return; // Detener la ejecución del script aquí
+                        }
+
+                        fetch(
+                            `/verificar_cliente/?num_telefono=${telefonoValue}`
+                        )
+                            .then((response) => response.json())
+                            .then((data) => {
+                                if (data.existe) {
+                                    // Si el cliente existe, se procede con el envío del formulario
+                                    console.log(data.nombre_completo);
+                                } else {
+                                    mostrarModal(
+                                        "<strong>Número de teléfono no registrado. Por favor, registre al cliente.</strong>",
+                                        "errorTelefonoModal",
+                                        "errorTelefonoModalMessage"
+                                    );
+                                    return;
+                                }
+                            })
+                            .catch((error) => {
+                                console.error(
+                                    "Error al verificar cliente:",
+                                    error
+                                );
+                                mostrarModal(
+                                    "<strong>Error al verificar el número de teléfono.</strong>",
+                                    "errorTelefonoModal",
+                                    "errorTelefonoModalMessage"
+                                );
+                                return;
+                            });
+
+                        var imeiValue = imeiInput.value.trim();
+                        if (imeiValue.length !== 15) {
+                            event.preventDefault();
+                            mostrarModal(
+                                "<strong>El IMEI debe tener exactamente 15 dígitos numéricos.</strong>",
+                                "errorIMEIModal",
+                                "errorIMEIModalMessage"
+                            );
+                            return;
+                        }
+
+                        event.preventDefault();
+                        mostrarModal(
+                            "<strong>Está a punto de registrar un servicio. ¿Desea continuar?</strong>",
+                            "advertenciaRegistroModal",
+                            "advertenciaRegistroModalMessage"
+                        );
+                    });
+
+                var confirmarAdvertenciaRegistroModalButton =
+                    document.getElementById(
+                        "confirmarAdvertenciaRegistroModal"
+                    );
+                confirmarAdvertenciaRegistroModalButton.addEventListener(
+                    "click",
+                    function () {
+                        cerrarAdvertenciaRegistroModal();
+                        guardarRegistroServicio();
+                        mostrarModal(
+                            "<strong>Servicio registrado exitosamente.</strong>",
+                            "exitoRegistroModal",
+                            "exitoRegistroModalMessage"
+                        );
+                    }
+                );
+
+                var exitoRegistroAceptadoButton = document.getElementById(
+                    "exitoRegistroAceptado"
+                );
+                exitoRegistroAceptadoButton.addEventListener(
+                    "click",
+                    function () {
+                        var servicioId =
+                            document.getElementById("miFormulario").dataset
+                                .servicioId; // Asumiendo que guardas el ID aquí
+                        window.location.href =
+                            "/servicios/consulta/" + servicioId;
+                    }
+                );
+
+                var cancelarRegistroButton =
+                    document.getElementById("cancelarRegistro");
+                cancelarRegistroButton.addEventListener("click", function () {
+                    mostrarModal(
+                        "<strong>Está a punto de cancelar esta operación. ¿Desea continuar?</strong>",
+                        "advertenciaCancelarRegistroModal",
+                        "advertenciaCancelarRegistroModalMessage"
+                    );
+                });
+
+                var advertenciaCancelarRegistroConfirmadoButton =
+                    document.getElementById(
+                        "advertenciaCancelarRegistroConfirmado"
+                    );
+                advertenciaCancelarRegistroConfirmadoButton.addEventListener(
+                    "click",
+                    function () {
+                        window.location.href = "/servicios";
+                    }
+                );
+            });
+
+            var registrarClienteButton =
+                document.getElementById("registrarCliente");
+            registrarClienteButton.addEventListener("click", function () {
+                window.location.href = "/servicios/clientes/registro";
+            });
+
+            var buscarClienteButton = document.getElementById("buscarCliente");
+            buscarClienteButton.addEventListener("click", function () {
+                var numTelefono =
+                    document.getElementById("id_num_telefono").value;
+                buscarCliente(numTelefono);
+            });
+
+            function mostrarModal(mensaje, modalId, mensajeModalId) {
+                var modalMessage = document.getElementById(mensajeModalId);
+                modalMessage.innerHTML = mensaje;
+                document.getElementById(modalId).style.display = "flex";
+            }
+
+            function cerrarExitoRegistroModal() {
+                window.location.href = "/servicios";
+            }
+
+            function cerrarAdvertenciaRegistroModal() {
+                document.getElementById(
+                    "advertenciaRegistroModal"
+                ).style.display = "none";
+            }
+
+            function cerrarAdvertenciaCancelarRegistroModal() {
+                document.getElementById(
+                    "advertenciaCancelarRegistroModal"
+                ).style.display = "none";
+            }
+
+            function cerrarErrorTelefonoModal() {
+                document.getElementById("errorTelefonoModal").style.display =
+                    "none";
+            }
+
+            function cerrarErrorIMEIModal() {
+                document.getElementById("errorIMEIModal").style.display =
+                    "none";
+            }
+
+            function guardarRegistroServicio() {
+                var form = document.getElementById("miFormulario");
+                var formData = new FormData(form);
+                var xhr = new XMLHttpRequest();
+                xhr.open("POST", "{% url 'servicios_registro' %}", true);
+                xhr.onreadystatechange = function () {
+                    if (
+                        xhr.readyState === XMLHttpRequest.DONE &&
+                        xhr.status === 200
+                    ) {
+                        var response = JSON.parse(xhr.responseText);
+                        form.dataset.servicioId = response.servicioId; // Guarda el ID del servicio
+                    }
+                };
+                xhr.send(formData);
+            }
+
+            function buscarCliente(numTelefono) {
+                fetch(`/verificar_cliente/?num_telefono=${numTelefono}`)
+                    .then((response) => response.json())
+                    .then((data) => {
+                        if (data.existe) {
+                            document.getElementById(
+                                "cliente"
+                            ).value = `${data.nombre_completo}`;
+                            document
+                                .getElementById("datosCliente")
+                                .classList.remove("hidden");
+                        } else {
+                            throw new Error("Cliente no encontrado");
+                        }
+                    })
+                    .catch((error) => {
+                        console.error("Error al buscar cliente:", error);
+                        document.getElementById("cliente").value =
+                            "NO ENCONTRADO";
+                        document
+                            .getElementById("datosCliente")
+                            .classList.remove("hidden");
+                    });
+            }
+        </script>
+    </body>
+</html>

@@ -1,0 +1,141 @@
+body {
+    margin: 0;
+    padding: 0;
+    font-family: Calibri;
+    background-color: #f1f3f3;
+}
+
+.header {
+    background: linear-gradient(to right, #131c79, #1f2497, #2327a2, #292ab0, #3231c6);
+    color: #fff;
+    padding: 10px;
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.icon,
+.icon-right {
+    position: absolute;
+    top: 0;
+    width: 100px;
+    height: 100px;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+.icon {
+    /* Icono izquierdo */
+    left: 0;
+}
+
+.icon-right {
+    /* Icono derecho */
+    right: 0;
+}
+
+.search-container {
+    display: flex;
+    align-items: center;
+    margin-bottom: 20px;
+    margin-left: 50px;
+    margin-right: 50px;
+}
+
+.input-busqueda {
+    flex-grow: 1;
+    padding: 8px;
+    margin-right: 10px;
+    border: 2px solid #ccc;
+    border-radius: 4px;
+    box-sizing: border-box;
+}
+
+.button-container {
+    display: flex;
+    align-items: center;
+    margin-left: 10px;
+}
+
+.button {
+    background: #343ba8;
+    color: #fff;
+    padding: 10px;
+    border: none;
+    border-radius: 20px;
+    cursor: pointer;
+    font-weight: bold;
+    text-decoration: none;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-right: 10px;
+}
+
+.button-text {
+    margin: 0;
+    color: inherit;
+}
+
+.table-container {
+max-width: 1200px;
+margin: 0 auto;
+background-color: #fff;
+border-radius: 8px;
+box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+padding: 20px;
+}
+
+table {
+width: 100%;
+border-collapse: collapse;
+margin-top: 20px;
+}
+
+th, td {
+padding: 12px;
+text-align: left;
+border-bottom: 1px solid #ddd;
+}
+
+th {
+background-color: #f2f2f2;
+color: #333;
+font-weight: bold;
+}
+
+td {
+color: #666;
+}
+
+tbody tr:hover {
+background-color: #f9f9f9;
+}
+
+@media (max-width: 768px) {
+.header img {
+    width: 60px;
+    height: 60px;
+}
+
+.header h1 {
+    font-size: 20px;
+}
+}
+.icon-cell {
+    text-align: center;
+    padding-right: 10px;
+}
+
+.icon-cell img {
+    height: 30px;
+    width: 30px;
+    margin-right: 10px;
+}
+
+.icon-cell img:last-child {
+    margin-right: 0;
+}
+
+h2{
+    text-align: center;
+}

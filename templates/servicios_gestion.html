@@ -1,0 +1,298 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Servicios - Tech Solutions</title>
+    <link rel="stylesheet" href="{% static 'css/servicios_gestion.css' %}" />
+</head>
+<body>
+    <div class="header">
+        <a href="/home">
+            <img src="{% static 'img/icono_ts.png' %}" alt="IconoTS" class="icon" />
+        </a>
+        <h1>GESTIÓN DE SERVICIOS</h1>
+        <a href="{% url 'logout' %}">
+            <img src="{% static 'img/logout_ts.png' %}" alt="LogoutTS" class="icon-right" />
+        </a>
+    </div>
+
+    <div class="search-container">
+        <input
+            type="text"
+            id="searchQuery"
+            name="searchQuery"
+            class="input-busqueda"
+            placeholder="Buscar por ID del servicio o nombre del cliente"
+        />
+        <div class="button-container">
+            <a href="/servicios/registro" class="button">
+                <p class="button-text">AGREGAR</p>
+            </a>
+        </div>
+    </div>
+
+    <div class="select-container">
+        <select class="select" id="estadoSelect">
+            <option value="todos" selected>Todos</option>
+            <option value="ingresado">Ingresado</option>
+            <option value="en_proceso">En proceso</option>
+            <option value="finalizado">Finalizado</option>
+            <option value="entregado">Entregado</option>
+        </select>
+        <div class="button-container">
+            <a href="#" class="button">
+                <p class="button-text" id="btnFiltrar">FILTRAR</p>
+            </a>
+        </div>
+    </div>
+
+    <table>
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Cliente</th>
+                <th>IMEI</th>
+                <th>Marca</th>
+                <th>Modelo</th>
+                <th>Estado</th>
+                <th>Descripción</th>
+                <th>Opciones</th>
+            </tr>
+        </thead>
+        <tbody id="tbodyServicios">
+            <!-- Aquí se cargarán los servicios dinámicamente -->
+        </tbody>
+    </table>
+
+    <div class="modal" id="advertenciaBorrarModal">
+        <div class="modal-content">
+            <div class="top-bar">
+                <span
+                    onclick="cerrarAdvertenciaBorrarModal()"
+                    class="close-button"
+                    >&times;</span
+                >
+            </div>
+            <img
+                src="{% static 'img/advertencia_ts.png' %}"
+                alt="AdvertenciaTS"
+                style="width: 60px; height: 60px; margin-bottom: 1px"
+            />
+            <p
+                id="advertenciaBorrarModalMessage"
+                style="margin-bottom: 20px; font-size: 20px"
+            ></p>
+            <button
+                onclick="cerrarAdvertenciaBorrarModal()"
+                style="margin-top: 10px; margin-right: 4%; margin-left: 4%"
+            >
+                CANCELAR
+            </button>
+            <button
+                id="advertenciaBorrarConfirmar"
+                style="margin-top: 10px; margin-right: 4%; margin-left: 4%"
+            >
+                CONFIRMAR
+            </button>
+        </div>
+    </div>
+
+    <div class="modal" id="exitoBorradoModal">
+        <div class="modal-content">
+            <div class="top-bar">
+                <span
+                    onclick="cerrarExitoBorradoModal()"
+                    class="close-button"
+                    >&times;</span
+                >
+            </div>
+            <img
+                src="{% static 'img/exito_ts.png' %}"
+                alt="ExitoTS"
+                style="width: 60px; height: 60px; margin-bottom: 1px"
+            />
+            <p
+                id="exitoBorradoModalMessage"
+                style="margin-bottom: 20px; font-size: 20px"
+            ></p>
+            <button
+                onclick="cerrarExitoBorradoModal()"
+                style="margin-top: 10px"
+            >
+                ACEPTAR
+            </button>
+        </div>
+    </div>
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+
+    <script>
+        function mostrarModal(mensaje, modalId, mensajeModalId, confirmCallback) {
+            var modalMessage = document.getElementById(mensajeModalId);
+            modalMessage.innerHTML = mensaje;
+            document.getElementById(modalId).style.display = "flex";
+
+            document.getElementById("advertenciaBorrarConfirmar").onclick =
+                function () {
+                    confirmCallback();
+                    cerrarAdvertenciaBorrarModal();
+                };
+        }
+
+        function cerrarAdvertenciaBorrarModal() {
+            document.getElementById("advertenciaBorrarModal").style.display = "none";
+        }
+
+        function cerrarExitoBorradoModal() {
+            document.getElementById("exitoBorradoModal").style.display = "none";
+        }
+
+        $(document).ready(function () {
+            function getCookie(name) {
+                let cookieValue = null;
+                if (document.cookie && document.cookie !== "") {
+                    const cookies = document.cookie.split(";");
+                    for (let i = 0; i < cookies.length; i++) {
+                        const cookie = cookies[i].trim();
+                        if (
+                            cookie.substring(0, name.length + 1) ===
+                            name + "="
+                        ) {
+                            cookieValue = decodeURIComponent(
+                                cookie.substring(name.length + 1)
+                            );
+                            break;
+                        }
+                    }
+                }
+                return cookieValue;
+            }
+            const csrftoken = getCookie("csrftoken");
+
+            var estado = $('#estadoSelect').val(); 
+
+            function cargarServicios(query) {
+                $.ajax({
+                    url: "/servicios/filtrar_servicios/",
+                    data: { 
+                        q: query,
+                        estado: estado
+                    },
+                    dataType: "json",
+                    success: function (data) {
+                        $("#tbodyServicios").empty();
+                        if (data.length > 0) {
+                            data.forEach(function (servicio) {
+                                $("#tbodyServicios").append(
+                                    `<tr data-id="${servicio.id}">
+                                    <td>${servicio.id}</td>
+                                    <td>${servicio.cliente}</td>
+                                    <td>${servicio.celular_imei}</td>
+                                    <td>${servicio.celular_marca}</td>
+                                    <td>${servicio.celular_modelo}</td>
+                                    <td>
+                                        ${(() => {
+                                            switch (servicio.estado) {
+                                                case "ingresado":
+                                                    return "Ingresado";
+                                                case "en_proceso":
+                                                    return "En proceso";
+                                                case "finalizado":
+                                                    return "Finalizado";
+                                                case "entregado":
+                                                    return "Entregado";
+                                                default:
+                                                    return servicio.estado || 'Estado no especificado';
+                                            }
+                                        })()}
+                                    </td>
+                                    <td>${servicio.descripcion}</td>
+                                    <td class="icon-cell">
+                                        <img src="{% static 'img/consulta_ts.png' %}" alt="Consultar" class="consulta-btn" data-servicio-id="${servicio.id}"/>
+                                        <img src="{% static 'img/editar_ts.png' %}" alt="Editar" class="edit-btn" data-servicio-id="${servicio.id}"/>
+                                        <img src="{% static 'img/borrar_ts.png' %}" alt="Borrar" class="delete-btn" data-servicio-id="${servicio.id}"/>    
+                                    </td>
+                                </tr>`
+                                );
+                            });
+                        } else {
+                        }
+                    },
+                    error: function () {
+                    },
+                });
+            }
+
+            $('#btnFiltrar').on('click', function (e) {
+                e.preventDefault();
+                estado = $('#estadoSelect').val();
+                var query = $("#searchQuery").val();
+                cargarServicios(query);
+            });
+
+            $(document).on('click', '.delete-btn', function () {
+                var servicioId = $(this).data("servicio-id");
+                mostrarModal(
+                    "<strong>Está a punto de eliminar un servicio. ¿Desea continuar?</strong>",
+                    "advertenciaBorrarModal",
+                    "advertenciaBorrarModalMessage",
+                    function () {
+                        if (servicioId) {
+                            $.ajax({
+                                url: "{% url 'eliminar_servicio' %}",
+                                type: "POST",
+                                data: {
+                                    servicio_id: servicioId,
+                                    csrfmiddlewaretoken: csrftoken,
+                                },
+                                success: function (response) {
+                                    if (response.success) {
+                                        $(`tr[data-id="${servicioId}"]`).remove();
+                                        mostrarModal(
+                                            "<strong>Servicio eliminado exitosamente</strong>",
+                                            "exitoBorradoModal",
+                                            "exitoBorradoModalMessage"
+                                        );
+                                    } else {
+                                    }
+                                },
+                                error: function () {
+                                },
+                            });
+                        } else {
+                            console.error("No se encontró el ID del servicio.");
+                        }
+                    }
+                );
+            });
+
+            $(document).on('click', '.edit-btn', function () {
+                var servicioId = $(this).data("servicio-id");
+                if (servicioId) {
+                    window.location.href = `/servicios/acciones/${servicioId}/`;
+                } else {
+                    console.error("No se encontró el ID del servicio.");
+                }
+            });
+
+            $(document).on('click', '.consulta-btn', function () {
+                var servicioId = $(this).data("servicio-id");
+                if (servicioId) {
+                    window.location.href = `/servicios/consulta/${servicioId}/`;
+                } else {
+                    console.error("No se encontró el ID del servicio.");
+                }
+            });
+
+            $("#searchQuery").on("input", function () {
+                var query = $(this).val();
+                cargarServicios(query);
+            });
+
+            cargarServicios("");
+        });
+    </script>
+</body>
+</html>

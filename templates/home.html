@@ -1,0 +1,178 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="es">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Home - Tech Solutions</title>
+        <style>
+            body {
+                margin: 0;
+                padding: 0;
+                font-family: Calibri;
+                background-color: #f1f3f3;
+            }
+
+            .header {
+                background: linear-gradient(
+                    to right,
+                    #131c79,
+                    #1f2497,
+                    #2327a2,
+                    #292ab0,
+                    #3231c6
+                );
+                color: #fff;
+                padding: 10px;
+                text-align: center;
+                margin-bottom: 20px;
+                position: relative; /* Añadido para soportar posicionamiento absoluto de iconos */
+            }
+
+            .icon, .icon-right {
+                position: absolute;
+                top: 0;
+                width: 100px;
+                height: 100px;
+                padding: 0;
+                box-sizing: border-box;
+            }
+
+            .icon { /* Icono izquierdo */
+                left: 0;
+            }
+
+            .icon-right { /* Icono derecho */
+                right: 0;
+            }
+
+            .welcome-container {
+                padding: 10px;
+                margin-left: 15px;
+                text-align: center;
+            }
+
+            .welcome-text {
+                color: #000;
+                font-size: 36px;
+                font-weight: bold;
+            }
+
+            .subtext {
+                color: #000;
+                font-size: 24px;
+                font-weight: bold;
+            }
+
+            .button-container {
+                display: flex;
+                justify-content: space-around;
+                margin-top: 20px;
+            }
+
+            .button {
+                width: 200px;
+                height: 200px;
+                border-radius: 20px;
+                background-color: #cfdef1;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                justify-content: center;
+                text-align: center;
+                color: #000;
+                text-decoration: none;
+                font-weight: bold;
+                position: relative;
+            }
+
+            .button img {
+                width: 100%;
+                height: auto;
+            }
+
+            .button-icon {
+                width: 100px;
+                height: 100px;
+            }
+
+            .button-text {
+                position: absolute;
+                bottom: 10px;
+                color: #000;
+                font-size: 16px;
+                font-weight: bold;
+            }
+        </style>
+    </head>
+    <body>
+        <div class="header">
+            <div class="background"></div>
+            <img src="{% static 'img/icono_ts.png' %}" alt="IconoTS" class="icon" />
+            <h1>TECH SOLUTIONS</h1>
+            <a href="{% url 'logout' %}">
+                <img src="{% static 'img/logout_ts.png' %}" alt="LogoutTS" class="icon-right" />
+            </a>
+        </div>
+
+        <div class="welcome-container">
+            <h1 class="welcome-text">¡Bienvenido!</h1>
+            <p class="subtext">Seleccione una opción</p>
+        </div>
+
+        <div class="button-container">
+            <a href="/clientes" class="button">
+                <div>
+                    <img
+                        src="{% static 'img/clientes_ts.png' %}"
+                        alt="ClienteTS"
+                        class="button-icon"
+                    />
+                </div>
+                <p class="button-text">CLIENTES</p>
+            </a>
+            <a href="/servicios" class="button">
+                <div>
+                    <img
+                        src="{% static 'img/servicios_ts.png' %}"
+                        alt="IconoTS"
+                        class="button-icon"
+                    />
+                </div>
+                <p class="button-text">SERVICIOS</p>
+            </a>
+            <a href="/cobros" class="button">
+                <div>
+                    <img
+                        src="{% static 'img/cobros_ts.png' %}"
+                        alt="IconoTS"
+                        class="button-icon"
+                    />
+                </div>
+                <p class="button-text">COBROS</p>
+            </a>
+
+            <a href="/empleados" class="button">
+                <div>
+                    <img
+                        src="{% static 'img/empleados_ts.png' %}"
+                        alt="IconoTS"
+                        class="button-icon"
+                    />
+                </div>
+                <p class="button-text">EMPLEADOS</p>
+            </a>
+            <a href="/inventario" class="button">
+                <div>
+                    <img
+                        src="{% static 'img/inventario_ts.png' %}"
+                        alt="IconoTS"
+                        class="button-icon"
+                    />
+                </div>
+                <p class="button-text">INVENTARIO</p>
+            </a>
+        </div>
+    </body>
+</html>

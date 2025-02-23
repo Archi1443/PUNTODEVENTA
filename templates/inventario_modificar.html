@@ -1,0 +1,155 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Inventario - Tech Solutions</title>
+    <link rel="stylesheet" href="{% static 'css/clientes_form.css' %}">
+</head>
+<body>
+    <div class="header">
+        <a href="/home">
+            <img src="{% static 'img/icono_ts.png' %}" alt="Icono Tech Solutions" class="icon">
+        </a>
+        <h1>MODIFICAR PRODUCTO</h1>
+        <a href="{% url 'logout' %}">
+            <img src="{% static 'img/logout_ts.png' %}" alt="LogoutTS" class="icon-right" />
+        </a>
+    </div>
+
+    <div class="welcome-container">
+        <p class="subtext">
+            Favor de completar todos los campos
+        </p>
+    </div>
+
+    <div class="formulario">
+        <form id="miFormulario" method="post" action="{% url 'inventario_editar' producto.id %}">
+            {% csrf_token %}
+            <div class="form-group">
+                {{ form.nombre.label_tag }} {{ form.nombre }}
+            </div>
+            <div class="form-group">
+                {{ form.cantidad.label_tag }} {{ form.cantidad }}
+            </div>
+            <div class="form-group">
+                {{ form.costo.label_tag }} {{ form.costo }}
+            </div>
+            <div class="form-group">
+                {{ form.precio.label_tag }} {{ form.precio }}
+            </div>
+            <div class="button-container">
+                <button type="button" id="cancelarRegistro" class="cancelar">CANCELAR</button>
+                <button type="submit">ACTUALIZAR</button>
+            </div>
+        </form>
+    </div>
+
+    <!-- Modals -->
+    <div class="modal" id="advertenciaRegistroModal">
+        <div class="modal-content">
+            <div class="top-bar">
+                <span onclick="cerrarAdvertenciaRegistroModal()" class="close-button">&times;</span>
+            </div>
+            <img src="{% static 'img/advertencia_ts.png' %}" alt="AdvertenciaTS" style="width: 60px; height: 60px; margin-bottom: 1px" />
+            <p id="advertenciaRegistroModalMessage" style="margin-bottom: 20px; font-size: 20px"></p>
+            <button onclick="cerrarAdvertenciaRegistroModal()" style="margin-top: 10px; margin-right: 4%; margin-left: 4%">CANCELAR</button>
+            <button id="confirmarAdvertenciaRegistroModal" style="margin-top: 10px; margin-right: 4%; margin-left: 4%">CONFIRMAR</button>
+        </div>
+    </div>
+
+    <div class="modal" id="exitoRegistroModal">
+        <div class="modal-content">
+            <div class="top-bar">
+                <span onclick="cerrarExitoRegistroModal()" class="close-button">&times;</span>
+            </div>
+            <img src="{% static 'img/exito_ts.png' %}" alt="ExitoTS" style="width: 60px; height: 60px; margin-bottom: 1px" />
+            <p id="exitoRegistroModalMessage" style="margin-bottom: 20px; font-size: 20px"></p>
+            <button id="exitoRegistroAceptado" style="margin-top: 10px">ACEPTAR</button>
+        </div>
+    </div>
+
+    <div class="modal" id="advertenciaCancelarRegistroModal">
+        <div class="modal-content">
+            <div class="top-bar">
+                <span onclick="cerrarAdvertenciaCancelarRegistroModal()" class="close-button">&times;</span>
+            </div>
+            <img src="{% static 'img/advertencia_ts.png' %}" alt="AdvertenciaTS" style="width: 60px; height: 60px; margin-bottom: 1px" />
+            <p id="advertenciaCancelarRegistroModalMessage" style="margin-bottom: 20px; font-size: 20px"></p>
+            <button onclick="cerrarAdvertenciaCancelarRegistroModal()" style="margin-top: 10px; margin-right: 4%; margin-left: 4%">CANCELAR</button>
+            <button id="advertenciaCancelarRegistroConfirmado" style="margin-top: 10px; margin-right: 4%; margin-left: 4%">CONFIRMAR</button>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            document.getElementById("miFormulario").addEventListener("submit", function (event) {
+                event.preventDefault();
+                mostrarModal(
+                    "<strong>Está a punto de actualizar un producto. ¿Desea continuar?</strong>",
+                    "advertenciaRegistroModal",
+                    "advertenciaRegistroModalMessage"
+                );
+            });
+
+            var confirmarAdvertenciaRegistroModalButton = document.getElementById("confirmarAdvertenciaRegistroModal");
+            confirmarAdvertenciaRegistroModalButton.addEventListener("click", function () {
+                cerrarAdvertenciaRegistroModal();
+                actualizarRegistroProducto();
+                mostrarModal(
+                    "<strong>Producto actualizado exitosamente.</strong>",
+                    "exitoRegistroModal",
+                    "exitoRegistroModalMessage"
+                );
+            });
+
+            var exitoRegistroAceptadoButton = document.getElementById("exitoRegistroAceptado");
+            exitoRegistroAceptadoButton.addEventListener("click", function () {
+                window.location.href = "/inventario";
+            });
+
+            var cancelarRegistroButton = document.getElementById("cancelarRegistro");
+            cancelarRegistroButton.addEventListener("click", function () {
+                mostrarModal(
+                    "<strong>Está a punto de cancelar esta operación. ¿Desea continuar?</strong>",
+                    "advertenciaCancelarRegistroModal",
+                    "advertenciaCancelarRegistroModalMessage"
+                );
+            });
+
+            var advertenciaCancelarRegistroConfirmadoButton = document.getElementById("advertenciaCancelarRegistroConfirmado");
+            advertenciaCancelarRegistroConfirmadoButton.addEventListener("click", function () {
+                window.location.href = "/inventario";
+            });
+        });
+
+        function mostrarModal(mensaje, modalId, mensajeModalId) {
+            var modalMessage = document.getElementById(mensajeModalId);
+            modalMessage.innerHTML = mensaje;
+            document.getElementById(modalId).style.display = "flex";
+        }
+
+        function cerrarExitoRegistroModal() {
+            window.location.href = "/inventario";
+        }
+
+        function cerrarAdvertenciaRegistroModal() {
+            document.getElementById("advertenciaRegistroModal").style.display = "none";
+        }
+
+        function cerrarAdvertenciaCancelarRegistroModal() {
+            document.getElementById("advertenciaCancelarRegistroModal").style.display = "none";
+        }
+
+        function actualizarRegistroProducto() {
+            var form = document.getElementById("miFormulario");
+            var formData = new FormData(form);
+            var xhr = new XMLHttpRequest();
+            xhr.open("POST", "{% url 'inventario_editar' producto.id %}", true);
+            xhr.setRequestHeader("X-HTTP-Method-Override", "PUT");
+            xhr.send(formData);
+        }
+    </script>
+</body>
+</html>

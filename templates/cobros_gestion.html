@@ -1,0 +1,152 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <link rel="stylesheet" href="{% static 'css/cobros_gestion.css' %}" />
+    <title>Inventario - Tech Solutions</title>
+</head>
+
+<body>
+    <div class="header">
+        <a href="/home">
+            <img src="{% static 'img/icono_ts.png' %}" alt="IconoTS" class="icon" />
+        </a>
+        <h1>GESTIÓN DE VENTAS</h1>
+        <a href="{% url 'logout' %}">
+            <img src="{% static 'img/logout_ts.png' %}" alt="LogoutTS" class="icon-right" />
+        </a>
+    </div>
+
+    <h2>Ventas de la Última Semana</h2>
+
+    <div class="search-container">
+        <input type="date" id="start-date" class="input-busqueda">
+        <input type="date" id="end-date" class="input-busqueda">
+        <button id="filter-button" class="button">Filtrar</button>
+        <button id="pdf-button" class="button">Generar PDF</button>
+    </div>
+    
+    <h3 id="most-sold-product">Producto Más Vendido: N/A</h3>
+ 
+    
+    <table>
+    <thead>
+        <tr>
+            <th>Fecha</th>
+            <th>Tipo</th>
+            <th>Nombre Producto</th>
+            <th>Cantidad</th>
+            <th>Precio Unitario</th>
+            <th>Subtotal</th>
+            <th>Costo</th>
+            <th>Ganancia</th>
+        </tr>
+    </thead>
+    <tbody id="ventas-semana-body">
+        <!-- Datos se llenarán dinámicamente aquí -->
+    </tbody>
+</table>
+
+<script>
+    $(document).ready(function() {
+        // Realiza una llamada AJAX para obtener los datos de ventas de la última semana
+        $.ajax({
+            url: "/cobros/reportes/",
+            type: "GET",
+            success: function(data) {
+                // Llena la tabla con los datos recibidos
+                var tbody = $('#ventas-semana-body');
+                tbody.empty(); // Limpiar el contenido actual de la tabla
+                
+                data.ventas_semana.forEach(function(venta) {
+                    var row = '<tr>' +
+                              '<td>' + venta.fecha + '</td>' +
+                              '<td>' + venta.tipo + '</td>' +
+                              '<td>' + venta.nombre_producto + '</td>' +
+                              '<td>' + venta.cantidad + '</td>' +
+                              '<td>' + venta.precio_unitario + '</td>' +
+                              '<td>' + venta.subtotal + '</td>' +
+                              '<td>' + venta.costo + '</td>' +
+                              '<td>' + venta.ganancia + '</td>' +
+                              '</tr>';
+                    tbody.append(row);
+                });
+                var mostSoldProduct = data.most_sold_product;
+                $('#most-sold-product').text('Producto Más Vendido: ' + mostSoldProduct.nombre + ' (Cantidad: ' + mostSoldProduct.cantidad + ')');
+            },
+            error: function(error) {
+                console.log("Error al obtener los datos de ventas:", error);
+            }
+        });
+    });
+</script>
+
+
+    <div id="charts-container">
+        <canvas id="profits-chart"></canvas>
+        <canvas id="top-product-chart"></canvas>
+    </div>
+
+    
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <script>
+        $(document).ready(function() {
+            function loadSalesData(startDate, endDate) {
+                $.ajax({
+                    url: "/cobros/reportes/",
+                    type: "GET",
+                    data: {
+                        start_date: startDate,
+                        end_date: endDate
+                    },
+                    success: function(data) {
+                        var tbody = $('#ventas-semana-body');
+                        tbody.empty(); // Limpiar el contenido actual de la tabla
+
+                        data.ventas_semana.forEach(function(venta) {
+                            var row = '<tr>' +
+                                      '<td>' + venta.fecha + '</td>' +
+                                      '<td>' + venta.tipo + '</td>' +
+                                      '<td>' + venta.nombre_producto + '</td>' +
+                                      '<td>' + venta.cantidad + '</td>' +
+                                      '<td>' + venta.precio_unitario + '</td>' +
+                                      '<td>' + venta.subtotal + '</td>' +
+                                      '<td>' + venta.costo + '</td>' +
+                                      '<td>' + venta.ganancia + '</td>' +
+                                      '</tr>';
+                            tbody.append(row);
+                        });
+                    },
+                    error: function(error) {
+                        console.log("Error al obtener los datos de ventas:", error);
+                    }
+                });
+            }
+
+            // Cargar datos inicialmente sin filtro de fechas
+            loadSalesData();
+
+            // Filtrar datos cuando se hace clic en el botón
+            $('#filter-button').click(function() {
+                var startDate = $('#start-date').val();
+                var endDate = $('#end-date').val();
+                loadSalesData(startDate, endDate);
+            });
+
+            $('#pdf-button').click(function() {
+                var startDate = $('#start-date').val();
+                var endDate = $('#end-date').val();
+                var url = `/cobros/reportes/pdf/?start_date=${startDate}&end_date=${endDate}`;
+                window.location.href = url;
+            });
+        });
+    </script>
+
+</body>
+
+</html>

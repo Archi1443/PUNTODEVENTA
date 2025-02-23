@@ -1,0 +1,620 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Inventario - Tech Solutions</title>
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+        <script src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.11.0/umd/popper.min.js"></script>
+        <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"></script>
+        <style>
+            body {
+                margin: 0;
+                padding: 0;
+                font-family: Calibri;
+                background-color: #f1f3f3;
+            }
+
+            .header {
+                background: linear-gradient(
+                    to right,
+                    #131c79,
+                    #1f2497,
+                    #2327a2,
+                    #292ab0,
+                    #3231c6
+                );
+                color: #fff;
+                padding: 10px;
+                text-align: center;
+                margin-bottom: 20px;
+                position: relative; /* Añadido para soportar posicionamiento absoluto de iconos */
+            }
+
+            .icon, .icon-right {
+                position: absolute;
+                top: 0;
+                width: 100px;
+                height: 100px;
+                padding: 0;
+                box-sizing: border-box;
+            }
+
+            .icon { /* Icono izquierdo */
+                left: 0;
+            }
+
+            .icon-right { /* Icono derecho */
+                right: 0;
+            }
+
+            .icon-cell {
+                text-align: center;
+                padding-right: 10px;
+            }
+
+            .icon-cell img {
+                height: 30px;
+                width: 30px;
+                margin-right: 10px;
+            }
+
+            .icon-cell img:last-child {
+                margin-right: 0;
+            }
+
+            .search-container {
+                display: flex;
+                align-items: center;
+                margin-bottom: 20px;
+                margin-left: 50px;
+                margin-right: 50px;
+            }
+
+            .input-busqueda {
+                flex-grow: 1;
+                padding: 8px;
+                margin-right: 10px;
+                border: 2px solid #ccc;
+                border-radius: 4px;
+                box-sizing: border-box;
+            }
+
+            .button-container {
+                display: flex;
+                align-items: center;
+                margin-left: 10px;
+            }
+
+            .button {
+                background: #343ba8;
+                color: #fff;
+                padding: 10px;
+                border: none;
+                border-radius: 20px;
+                cursor: pointer;
+                font-weight: bold;
+                text-decoration: none;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                margin-right: 10px;
+            }
+
+            .button-text {
+                margin: 0;
+                color: inherit;
+            }
+
+            table {
+                width: calc(100% - 100px);
+                margin-top: 20px;
+                margin-left: 50px;
+                margin-right: 50px;
+                border-collapse: collapse;
+                background-color: white;
+            }
+
+            th,
+            td {
+                padding: 12px;
+                border: 1px solid #ddd;
+                text-align: left;
+            }
+
+            th:nth-child(1),
+            td:nth-child(1) {
+                width: 15%;
+            }
+
+            th:nth-child(2),
+            td:nth-child(2) {
+                width: 15%;
+            }
+
+            th:nth-child(3),
+            td:nth-child(3) {
+                width: 15%;
+            }
+
+            th:nth-child(4),
+            td:nth-child(4) {
+                width: 15%;
+            }
+
+            th:nth-child(5),
+            td:nth-child(5) {
+                width: 15%;
+            }
+
+            .modal {
+                display: none;
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background-color: rgba(0, 0, 0, 0.5);
+                justify-content: center;
+                align-items: center;
+            }
+
+            .modal-content {
+                background-color: #fff;
+                padding: 80px;
+                border-radius: 0;
+                text-align: center;
+                max-width: 80%;
+                margin: 0 auto;
+                position: relative;
+            }
+
+            .modal .top-bar {
+                background-color: #343ba8;
+                color: #fff;
+                padding: 15px;
+                width: 100%;
+                margin: 0 auto;
+                position: absolute;
+                top: 0;
+                right: 0;
+                box-sizing: border-box;
+            }
+
+            .modal .modal-content .close-button {
+                color: #fff;
+                font-size: 20px;
+                position: absolute;
+                top: 50%;
+                transform: translateY(-50%);
+                right: 10px;
+                cursor: pointer;
+            }
+
+            .modal button {
+                background: #343ba8;
+                color: #fff;
+                padding: 10px;
+                border: none;
+                border-radius: 20px;
+                cursor: pointer;
+                font-weight: bold;
+            }
+
+            .input-grande {
+                width: 80%;
+                padding: 15px;
+                font-size: 18px;
+                border: 2px solid #ccc;
+                border-radius: 4px;
+                margin-bottom: 20px;
+                box-sizing: border-box;
+            }
+        </style>
+    </head>
+    <body>
+        <div class="header">
+            <a href="/home">
+                <img
+                    src="{% static 'img/icono_ts.png' %}"
+                    alt="IconoTS"
+                    class="icon"
+                />
+            </a>
+            <h1>GESTIÓN DE PRODUCTOS</h1>
+            <a href="{% url 'logout' %}">
+                <img
+                    src="{% static 'img/logout_ts.png' %}"
+                    alt="LogoutTS"
+                    class="icon-right"
+                />
+            </a>
+        </div>
+
+        <div class="search-container">
+            <input
+                type="text"
+                id="searchQuery"
+                name="searchQuery"
+                class="input-busqueda"
+                placeholder="Buscar por nombre"
+            />
+            <div class="button-container">
+                <a href="/inventario/registro" class="button">
+                    <p class="button-text">AGREGAR</p>
+                </a>
+            </div>
+        </div>
+
+        <div class="table">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Nombre</th>
+                        <th>Cantidad</th>
+                        <th>Costo</th>
+                        <th>Precio</th>
+                        <th>Opciones</th>
+                    </tr>
+                </thead>
+                <tbody id="tbodyProductos"></tbody>
+            </table>
+        </div>
+
+        <div class="modal" id="advertenciaBorrarModal">
+            <div class="modal-content">
+                <div class="top-bar">
+                    <span
+                        onclick="cerrarAdvertenciaBorrarModal()"
+                        class="close-button"
+                        >&times;</span
+                    >
+                </div>
+                <img
+                    src="{% static 'img/advertencia_ts.png' %}"
+                    alt="AdvertenciaTS"
+                    style="width: 60px; height: 60px; margin-bottom: 1px"
+                />
+                <p
+                    id="advertenciaBorrarModalMessage"
+                    style="margin-bottom: 20px; font-size: 20px"
+                ></p>
+                <button
+                    onclick="cerrarAdvertenciaBorrarModal()"
+                    style="margin-top: 10px; margin-right: 4%; margin-left: 4%"
+                >
+                    CANCELAR
+                </button>
+                <button
+                    id="advertenciaBorrarConfirmar"
+                    style="margin-top: 10px; margin-right: 4%; margin-left: 4%"
+                >
+                    CONFIRMAR
+                </button>
+            </div>
+        </div>
+
+        <div class="modal" id="exitoBorradoModal">
+            <div class="modal-content">
+                <div class="top-bar">
+                    <span
+                        onclick="cerrarExitoBorradoModal()"
+                        class="close-button"
+                        >&times;</span
+                    >
+                </div>
+                <img
+                    src="{% static 'img/exito_ts.png' %}"
+                    alt="ExitoTS"
+                    style="width: 60px; height: 60px; margin-bottom: 1px"
+                />
+                <p
+                    id="exitoBorradoModalMessage"
+                    style="margin-bottom: 20px; font-size: 20px"
+                ></p>
+                <button
+                    onclick="cerrarExitoBorradoModal()"
+                    style="margin-top: 10px"
+                >
+                    ACEPTAR
+                </button>
+            </div>
+        </div>
+
+        <div class="modal" id="advertenciaEditarQtyModal">
+            <div class="modal-content">
+                <div class="top-bar">
+                    <span onclick="cerrarAdvertenciaEditarQtyModal()" class="close-button">&times;</span>
+                </div>
+                <img src="{% static 'img/advertencia_ts.png' %}" alt="AdvertenciaTS" style="width: 60px; height: 60px; margin-bottom: 1px" />
+                <p id="advertenciaEditarQtyModalMessage" style="margin-bottom: 20px; font-size: 20px"></p>
+                <input type="number" id="cantidadProducto" class="input-grande" style="margin-bottom: 20px;" />
+                <button id="advertenciaEditarQtyModalConfirmar" style="margin-top: 10px; margin-right: 4%; margin-left: 4%">CONFIRMAR</button>
+            </div>
+        </div>
+
+        <div class="modal" id="errorModal">
+            <div class="modal-content">
+                <div class="top-bar">
+                    <span
+                        onclick="cerrarErrorModal()"
+                        class="close-button"
+                        >&times;</span
+                    >
+                </div>
+                <img
+                    src="{% static 'img/error_ts.png' %}"
+                    alt="ErrorTS"
+                    style="width: 60px; height: 60px; margin-bottom: 1px"
+                />
+                <p
+                    id="errorModalMessage"
+                    style="margin-bottom: 20px; font-size: 20px"
+                ></p>
+                <button
+                    onclick="cerrarErrorModal()"
+                    style="margin-top: 10px; margin-right: 4%; margin-left: 4%"
+                >
+                    ACEPTAR
+                </button>
+            </div>
+        </div>
+
+        <script>
+            function mostrarModal(
+                mensaje,
+                modalId,
+                mensajeModalId,
+                confirmCallback
+            ) {
+                var modalMessage = document.getElementById(mensajeModalId);
+                modalMessage.innerHTML = mensaje;
+                document.getElementById(modalId).style.display = "flex";
+
+                // Al hacer clic en confirmar, ejecuta la función confirmCallback
+                document.getElementById("advertenciaBorrarConfirmar").onclick =
+                    function () {
+                        confirmCallback();
+                        cerrarAdvertenciaBorrarModal();
+                    };
+
+                document.getElementById("advertenciaEditarQtyModalConfirmar").onclick = function () {
+                    cantidadProducto = document.getElementById("cantidadProducto").value;
+                    confirmCallback(cantidadProducto);
+                    cerrarAdvertenciaEditarQtyModal();
+                };
+            }
+
+            function cerrarAdvertenciaBorrarModal() {
+                document.getElementById(
+                    "advertenciaBorrarModal"
+                ).style.display = "none";
+            }
+
+            function cerrarExitoBorradoModal() {
+                document.getElementById("exitoBorradoModal").style.display =
+                    "none";
+            }
+
+            function cerrarAdvertenciaEditarQtyModal () {
+                document.getElementById("advertenciaEditarQtyModal").style.display =
+                    "none";
+            }
+
+            function cerrarErrorModal() {
+                document.getElementById("errorModal").style.display =
+                    "none";
+            }
+
+            $(document).ready(function () {
+                let cantidadProducto;
+
+                function getCookie(name) {
+                    let cookieValue = null;
+                    if (document.cookie && document.cookie !== "") {
+                        const cookies = document.cookie.split(";");
+                        for (let i = 0; i < cookies.length; i++) {
+                            const cookie = cookies[i].trim();
+                            if (
+                                cookie.substring(0, name.length + 1) ===
+                                name + "="
+                            ) {
+                                cookieValue = decodeURIComponent(
+                                    cookie.substring(name.length + 1)
+                                );
+                                break;
+                            }
+                        }
+                    }
+                    return cookieValue;
+                }
+                const csrftoken = getCookie("csrftoken");
+
+                function cargarProductos(query) {
+                    $.ajax({
+                        url: "/buscar_producto/",
+                        data: { q: query },
+                        dataType: "json",
+                        success: function (data) {
+                            $("#tbodyProductos").empty();
+                            if (data.length > 0) {
+                                data.forEach(function (producto) {
+                                    $("#tbodyProductos").append(
+                                        `<tr data-id="${producto.id}">
+                                        <td>${producto.nombre}</td>
+                                        <td>${producto.cantidad}</td>
+                                        <td>${producto.costo}</td>
+                                        <td>${producto.precio}</td>
+                                        <td class="icon-cell">
+                                            <img src="{% static 'img/editar_ts.png' %}" alt="Editar" class="edit-btn" data-producto-id="${producto.id}"/>
+                                            <img src="{% static 'img/add_ts.png' %}" alt="Agregar" class="add-qty-btn" data-producto-id="${producto.id}"/>
+                                            <img src="{% static 'img/menos_ts.png' %}" alt="Quitar" class="subtract-qty-btn" data-producto-id="${producto.id}"/>
+                                            <img src="{% static 'img/borrar_ts.png' %}" alt="Borrar" class="delete-btn" data-producto-id="${producto.id}"/>
+                                        </td>
+                                    </tr>`
+                                    );
+                                });
+                            } else {
+                            }
+                        },
+                        error: function () {
+                        },
+                    });
+                }
+
+                $(document).on("click", ".edit-btn", function () {
+                    var productoId = $(this).data("producto-id");
+                    if (productoId) {
+                        window.location.href = `/inventario/modificar/${productoId}/`; // Asegúrate de que la URL termina con una barra '/'
+                    } else {
+                        console.error("No se encontró el ID del producto.");
+                    }
+                });
+
+                $(document).on("click", ".add-qty-btn", function () {
+                    var productoId = $(this).data("producto-id");
+                    if (productoId) {
+                        mostrarModal(
+                            "<strong>Ingrese la cantidad de producto a sumar:</strong>",
+                            "advertenciaEditarQtyModal",
+                            "advertenciaEditarQtyModalMessage",
+                            function (cantidadProducto) {
+                                console.log(cantidadProducto)
+                                if (productoId) {
+                                    $.ajax({
+                                        url: "{% url 'actualizar_cantidad_producto' %}",
+                                        type: "POST",
+                                        data: {
+                                            id: productoId,
+                                            change: cantidadProducto,
+                                            csrfmiddlewaretoken: csrftoken,
+                                        },
+                                        success: function (response) {
+                                            if (response.success) {
+                                                var $row = $('tr[data-id="' + productoId + '"]');
+                                                var nuevaCantidad = response.new_quantity; // Asume que la respuesta contiene la nueva cantidad
+                                                $row.find('td:nth-child(2)').text(nuevaCantidad); // Actualiza la cantidad en la tabla
+                                                mostrarModal(
+                                                    "<strong>Cantidad sumada exitosamente</strong>",
+                                                    "exitoBorradoModal",
+                                                    "exitoBorradoModalMessage"
+                                                );
+                                            } else {
+                                            }
+                                        },
+                                        error: function (response) {
+                                        },
+                                    });
+                                } else {
+                                    console.error(
+                                        "No se encontró el ID del producto."
+                                    );
+                                }
+                            }
+                        );
+                    } else {
+                        console.error("No se encontró el ID del producto.");
+                    }
+                });
+
+                $(document).on("click", ".subtract-qty-btn", function () {
+                    var productoId = $(this).data("producto-id");
+                    if (productoId) {
+                        mostrarModal(
+                            "<strong>Ingrese la cantidad de producto a restar:</strong>",
+                            "advertenciaEditarQtyModal",
+                            "advertenciaEditarQtyModalMessage",
+                            function (cantidadProducto) {
+                                console.log(cantidadProducto)
+                                if (productoId) {
+                                    $.ajax({
+                                        url: "{% url 'actualizar_cantidad_producto' %}",
+                                        type: "POST",
+                                        data: {
+                                            id: productoId,
+                                            change: -cantidadProducto,
+                                            csrfmiddlewaretoken: csrftoken,
+                                        },
+                                        success: function (response) {
+                                            if (response.success) {
+                                                var $row = $('tr[data-id="' + productoId + '"]');
+                                                var nuevaCantidad = response.new_quantity; // Asume que la respuesta contiene la nueva cantidad
+                                                $row.find('td:nth-child(2)').text(nuevaCantidad); // Actualiza la cantidad en la tabla
+                                                mostrarModal(
+                                                    "<strong>Cantidad restada exitosamente</strong>",
+                                                    "exitoBorradoModal",
+                                                    "exitoBorradoModalMessage"
+                                                );
+                                            } else {
+                                                mostrarModal(
+                                                    "<strong>No puede restar más de la cantidad disponible.</strong>",
+                                                    "errorModal",
+                                                    "errorModalMessage"
+                                                );
+                                            }
+                                        },
+                                        error: function () {
+                                        },
+                                    });
+                                } else {
+                                    console.error(
+                                        "No se encontró el ID del producto."
+                                    );
+                                }
+                            }
+                        );
+                    } else {
+                        console.error("No se encontró el ID del producto.");
+                    }
+                });
+
+                $(document).on("click", ".delete-btn", function () {
+                    var productoId = $(this).data("producto-id");
+                    mostrarModal(
+                        "<strong>Está a punto de eliminar un producto. ¿Desea continuar?</strong>",
+                        "advertenciaBorrarModal",
+                        "advertenciaBorrarModalMessage",
+                        function () {
+                            if (productoId) {
+                                $.ajax({
+                                    url: "{% url 'eliminar_producto' %}",
+                                    type: "POST",
+                                    data: {
+                                        producto_id: productoId,
+                                        csrfmiddlewaretoken: csrftoken,
+                                    },
+                                    success: function (response) {
+                                        if (response.success) {
+                                            $(`tr[data-id="${productoId}"]`).remove();
+                                            mostrarModal(
+                                                "<strong>Producto eliminado exitosamente</strong>",
+                                                "exitoBorradoModal",
+                                                "exitoBorradoModalMessage"
+                                            );
+                                        } else {
+                                        }
+                                    },
+                                    error: function () {
+                                    },
+                                });
+                            } else {
+                                console.error(
+                                    "No se encontró el ID del producto."
+                                );
+                            }
+                        }
+                    );
+                });
+
+                $("#searchQuery").on("input", function () {
+                    var query = $(this).val(); // Toma el valor actual del campo de búsqueda
+                    cargarProductos(query); // Llama a cargarEmpleados con la consulta
+                });
+
+                cargarProductos(""); // Carga inicial de productos
+            });
+        </script>
+    </body>
+</html>

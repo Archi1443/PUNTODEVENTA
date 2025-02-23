@@ -1,0 +1,644 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Cobros - Tech Solutions</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <link rel="stylesheet" href="{% static 'css/cobros.css' %}" />
+</head>
+<body>
+    <div class="header">
+        <a href="/home"><img src="{% static 'img/icono_ts.png' %}" alt="IconoTS" class="icon"></a>
+        <h1>COBROS</h1>
+        <a href="{% url 'logout' %}">
+            <img src="{% static 'img/logout_ts.png' %}" alt="LogoutTS" class="icon-right" />
+        </a>
+    </div>
+
+    <div class="container">
+        <!-- Div 1: Buscar Servicio -->
+        <div class="div1">
+            <h2>Buscar Servicio</h2>
+            <input type="number" id="service_id" placeholder="Numero de nota">
+            <button onclick="searchServiceById()">Buscar por numero de nota</button>
+            <input type="text" id="client_name" placeholder="Nombre del Cliente">
+            <button onclick="searchServiceByName()">Buscar por Nombre</button>
+            <div id="service_info"></div>
+            <div id="ticket_info">
+                <h3>Ticket:</h3>
+                <ul id="product_list"></ul>
+                <h2 id="total_price"></h2>
+                <button type="submit" id="pay_button" onclick="registerSale()">Pagar</button>
+            </div>
+        </div>
+
+        <!-- Div 2: Buscar Productos -->
+        <div class="div2">
+            <h2>Buscar Productos</h2>
+            <input type="text" id="product_search" placeholder="Buscar Producto">
+            <table id="products_table">
+                <thead>
+                    <tr>
+                        <th>Nombre</th>
+                        <th>Precio</th>
+                        <th>Cantidad Disponible</th>
+                        <th>Agregar</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        let ticketProducts = [];
+        let totalPrice = 0;
+        let serviceTotal = 0;
+        let isService = false;
+        let IDServicio;
+
+        $(document).ready(function() {
+            searchProducts();
+        });
+
+        function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+
+        const csrftoken = getCookie('csrftoken');
+
+        function searchServiceById() {
+            const serviceId = $('#service_id').val();
+            if (!serviceId) {
+                event.preventDefault(); // Evitar que se envíe el formulario si la validación falla
+                            mostrarModal(
+                                "<strong>Por favor, ingrese un numero de nota valido!</strong>",
+                                "errorIDModal",
+                                "errorIDModalMessage"
+                            );
+                            return;
+            }
+
+            $.ajax({
+                url: `/buscar_servicio_por_id/${serviceId}/`,
+                method: 'GET',
+                success: function(data) {
+                    const error = data.error;
+                    console.log(error)
+                    displayServiceInfo(data);
+                    
+                }
+
+            });
+        }
+
+        function searchServiceByName() {
+            const clientName = $('#client_name').val();
+            if (!clientName) {
+                event.preventDefault(); // Evitar que se envíe el formulario si la validación falla
+                            mostrarModal(
+                                "<strong>Por favor, ingrese un nombre valido!</strong>",
+                                "errorIDModal",
+                                "errorIDModalMessage"
+                            );
+                return;
+            }
+
+            $.ajax({
+                url: `/buscar_servicio_por_nombre/?name=${clientName}`,
+                method: 'GET',
+                success: function(data) {
+                    displayServiceInfo(data);
+                }
+            });
+        }
+
+        function displayServiceInfo(data) {
+            if (data.success) {
+                const service = data.service;
+                let serviceInfo = `<p>Numero de nota: ${service.id}</p>`;
+                IDServicio = service.id;
+                serviceInfo += `<p>Cliente: ${service.cliente}</p>`;
+                serviceInfo += `<p>Teléfono: ${service.telefono}</p>`;
+                serviceInfo += `<p>Descripción del Dispositivo: ${service.descripcion}</p>`;
+                serviceInfo += `<p>Reparación: ${service.reparacion}</p>`;
+                serviceInfo += `<p>Estado: ${service.estado}</p>`;
+                serviceInfo += `<p>Cotización: ${service.cotizacion}</p>`;
+                serviceInfo += `<p>Total final: ${service.costofinal}</p>`;
+                if (service.anticipo) {
+                    serviceInfo += `<p>Anticipo: ${service.anticipo}</p>`;
+                }
+                
+                serviceInfo += `<p>Pagado: ${service.pagado}</p>`;
+                serviceInfo += `<p>Total a pagar: ${service.total}</p>`;
+                $('#service_info').html(serviceInfo);
+
+                // Actualizar el total con el total del servicio
+                serviceTotal = parseFloat(service.total);
+                updateTotalPrice();
+                isService = true;
+            } else {
+                const error = data.error;
+                if(error=="ID"){
+                    event.preventDefault(); // Evitar que se envíe el formulario si la validación falla
+                        mostrarModal(
+                            "<strong>Nota no encontrada!</strong>",
+                            "errorIDModal",
+                            "errorIDModalMessage"
+                        );
+                    return;
+                }else if(error=="Pago"){
+                    event.preventDefault(); // Evitar que se envíe el formulario si la validación falla
+                        mostrarModal(
+                            "<strong>Este servicio ya se encuenta pagado!</strong>",
+                            "errorIDModal",
+                            "errorIDModalMessage"
+                        );
+                    return;
+                }else if(error=="Estado"){
+                    event.preventDefault(); // Evitar que se envíe el formulario si la validación falla
+                        mostrarModal(
+                            "<strong>Este servicio ya se encuenta entregado!</strong>",
+                            "errorIDModal",
+                            "errorIDModalMessage"
+                        );
+                    return;
+                }else if(error=="Cliente"){
+                    event.preventDefault(); // Evitar que se envíe el formulario si la validación falla
+                        mostrarModal(
+                            "<strong>Cliente y/o nota no encontrada!</strong>",
+                            "errorIDModal",
+                            "errorIDModalMessage"
+                        );
+                    return;
+                }else if(error=="Noterminado"){
+                    event.preventDefault(); // Evitar que se envíe el formulario si la validación falla
+                        mostrarModal(
+                            "<strong>El equipo aun no esta terminado!</strong>",
+                            "errorIDModal",
+                            "errorIDModalMessage"
+                        );
+                    return;
+                }
+                
+            }
+        }
+
+        function searchProducts(query = '') {
+            $.ajax({
+                url: `/buscar_producto/?q=${query}`,
+                method: 'GET',
+                success: function(data) {
+                    const productsTable = $('#products_table tbody');
+                    productsTable.empty();
+                    data.forEach(product => {
+                        productsTable.append(`
+                            <tr>
+                                <td>${product.nombre}</td>
+                                <td>${product.precio}</td>
+                                <td id="quantity-${product.id}">${product.cantidad}</td>
+                                <td><button onclick="addToTicket(${product.id}, '${product.nombre}', ${product.precio}, ${product.cantidad})">Agregar</button></td>
+                            </tr>
+                        `);
+                    });
+                }
+            });
+        }
+
+        $('#product_search').on('input', function() {
+            searchProducts($(this).val());
+        });
+
+
+        
+        
+
+        function addToTicket(productId, productName, productPrice, availableQuantity) {
+            cantidad = 1;
+
+            if (availableQuantity <= 0) {
+                event.preventDefault(); // Evitar que se envíe el formulario si la validación falla
+                        mostrarModal(
+                            "<strong>No hay stock suficiente!</strong>",
+                            "errorIDModal",
+                            "errorIDModalMessage"
+                        );
+                return;
+            }
+            const ep = ticketProducts.find(p => p.id === productId);
+            if(ep){
+                cantidad = ep.cant;
+            }else{
+                cantidad = 1;
+            }
+            
+            $.ajax({
+                url: '/actualizar_stock/',
+                method: 'POST',
+                headers: { "X-CSRFToken": csrftoken },
+                data: {
+                    product_id: productId,
+                    quantity: -1, // Disminuir en 1 el stock
+                },
+                success: function(data) {
+                    if (data.success) {
+                        const existingProduct = ticketProducts.find(p => p.id === productId);
+                        if(existingProduct){
+                            console.log("Si hay");
+                            existingProduct.cant = existingProduct.cant+1;
+                            totalPrice += productPrice;
+                            updateTicket();
+                            updateTotalPrice();
+                            searchProducts();
+                            let newQuantity = parseInt($(`#quantity-${productId}`).text()) - product.cant;
+                            $(`#quantity-${productId}`).text(newQuantity);
+                        }else{
+                            ticketProducts.push({ id: productId, name: productName, price: productPrice, type: 'Producto', cant: 1});
+                            totalPrice += productPrice;
+                            updateTicket();
+                            updateTotalPrice();
+
+                            let newQuantity = parseInt($(`#quantity-${productId}`).text()) - 1;
+                            $(`#quantity-${productId}`).text(newQuantity);
+                        }
+                        
+                    } else {
+                        alert('Error al actualizar el stock.');
+                    }
+                }
+            });
+        }
+
+        function updateTicket() {
+            const productList = $('#product_list');
+            productList.empty();
+            ticketProducts.forEach((product, index) => {
+                productList.append(`
+                    <li>
+                        <h4>${product.name}</h4>
+                            <h5>-Precio unitario: $${product.price}</h5>
+                            <h5>-Cantidad: ${product.cant}</h5>
+                        <button onclick="removeFromTicket(${index})">Eliminar</button>
+                    </li>
+                `);
+            });
+        }
+
+        function removeFromTicket(index) {
+            const product = ticketProducts[index];
+            totalPrice -= product.price * product.cant;
+
+            $.ajax({
+                url: '/actualizar_stock/',
+                method: 'POST',
+                headers: { "X-CSRFToken": csrftoken },
+                data: {
+                    product_id: product.id,
+                    quantity: product.cant, // Aumentar en 1 el stock
+                },
+                success: function(data) {
+                    if (data.success) {
+                        ticketProducts.splice(index, 1);
+                        updateTicket();
+                        updateTotalPrice();
+
+                        let newQuantity = parseInt($(`#quantity-${product.id}`).text()) + product.cant;
+                        $(`#quantity-${product.id}`).text(newQuantity);
+                    } else {
+                        alert('Error al actualizar el stock.');
+                    }
+                }
+            });
+        }
+
+        function updateTotalPrice() {
+            const finalTotal = totalPrice + serviceTotal;
+            $('#total_price').text(`Total: $${finalTotal}`);
+
+            if (finalTotal > 0) {
+                $('#pay_button').show();
+            } else {
+                $('#pay_button').hide();
+            }
+        }
+        
+
+        function registerSale() {
+        
+
+            const items = ticketProducts.map(product => ({
+                id: product.id,
+                name: product.name,
+                quantity: product.cant,
+                unit_price: product.price,
+                type: product.type
+
+            }));
+
+            if (isService) {
+                items.push({
+                    id: IDServicio,
+                    name: 'Reparación',
+                    quantity: 1,
+                    unit_price: serviceTotal,
+                    type: 'Reparación'
+                });
+            }
+
+            const total = totalPrice + serviceTotal;
+
+            $.ajax({
+                url: '/registrar_venta/',
+                method: 'POST',
+                headers: { "X-CSRFToken": csrftoken },
+                data: JSON.stringify({
+                    items: items,
+                    total: total,
+                    id: IDServicio,
+                }),
+                contentType: 'application/json',
+                success: function(data) {
+                    if (data.success) {
+                        mostrarModal(
+                        "<strong>Pago registrado exitosamente.</strong>",
+                        "registroExitosoModal",
+                        "registroExitosoModalMessage"
+                        );
+                    } else {
+                        alert('Error al registrar la venta.');
+                    }
+                }
+            });
+        }
+    </script>
+
+
+    <!-- Modals -->
+    <div class="modal" id="registroExitosoModal">
+        <div class="modal-content">
+            <div class="top-bar">
+                <span onclick="cerrarRegistroExitosoModal()" class="close-button">&times;</span>
+            </div>
+            <img src="{% static 'img/exito_ts.png' %}" alt="ExitoTS" style="width: 60px; height: 60px; margin-bottom: 1px" />
+            <p id="registroExitosoModalMessage" style="margin-bottom: 20px; font-size: 20px"></p>
+            <button onclick="cerrarRegistroExitosoModal()" style="margin-top: 10px; margin-right: 4%; margin-left: 4%">
+                ACEPTAR
+            </button>
+        </div>
+    </div>
+
+    <div class="modal" id="advertenciaRegistroModal">
+        <div class="modal-content">
+            <div class="top-bar">
+                <span
+                    onclick="cerrarAdvertenciaRegistroModal()"
+                    class="close-button"
+                    >&times;</span
+                >
+            </div>
+            <img
+                src="{% static 'img/advertencia_ts.png' %}"
+                alt="AdvertenciaTS"
+                style="width: 60px; height: 60px; margin-bottom: 1px"
+            />
+            <p
+                id="advertenciaRegistroModalMessage"
+                style="margin-bottom: 20px; font-size: 20px"
+            ></p>
+            <button
+                onclick="cerrarAdvertenciaRegistroModal()"
+                style="margin-top: 10px; margin-right: 4%; margin-left: 4%"
+            >
+                CANCELAR
+            </button>
+            <button
+                id="confirmarAdvertenciaRegistroModal"
+                style="margin-top: 10px; margin-right: 4%; margin-left: 4%"
+            >
+                CONFIRMAR
+            </button>
+        </div>
+    </div>
+
+    <div class="modal" id="exitoRegistroModal">
+        <div class="modal-content">
+            <div class="top-bar">
+                <span
+                    onclick="cerrarExitoRegistroModal()"
+                    class="close-button"
+                    >&times;</span
+                >
+            </div>
+            <img
+                src="{% static 'img/exito_ts.png' %}"
+                alt="ExitoTS"
+                style="width: 60px; height: 60px; margin-bottom: 1px"
+            />
+            <p
+                id="exitoRegistroModalMessage"
+                style="margin-bottom: 20px; font-size: 20px"
+            ></p>
+            <button id="exitoRegistroAceptado" style="margin-top: 10px">
+                ACEPTAR
+            </button>
+        </div>
+    </div>
+
+    <div class="modal" id="advertenciaCancelarRegistroModal">
+        <div class="modal-content">
+            <div class="top-bar">
+                <span
+                    onclick="cerrarAdvertenciaCancelarRegistroModal()"
+                    class="close-button"
+                    >&times;</span
+                >
+            </div>
+            <img
+                src="{% static 'img/advertencia_ts.png' %}"
+                alt="AdvertenciaTS"
+                style="width: 60px; height: 60px; margin-bottom: 1px"
+            />
+            <p
+                id="advertenciaCancelarRegistroModalMessage"
+                style="margin-bottom: 20px; font-size: 20px"
+            ></p>
+            <button
+                onclick="cerrarAdvertenciaCancelarRegistroModal()"
+                style="margin-top: 10px; margin-right: 4%; margin-left: 4%"
+            >
+                CANCELAR
+            </button>
+            <button
+                id="advertenciaCancelarRegistroConfirmado"
+                style="margin-top: 10px; margin-right: 4%; margin-left: 4%"
+            >
+                CONFIRMAR
+            </button>
+        </div>
+    </div>
+
+    <div class="modal" id="errorTelefonoModal">
+        <div class="modal-content">
+            <div class="top-bar">
+                <span
+                    onclick="cerrarErrorTelefonoModal()"
+                    class="close-button"
+                    >&times;</span
+                >
+            </div>
+            <img
+                src="{% static 'img/error_ts.png' %}"
+                alt="ErrorTS"
+                style="width: 60px; height: 60px; margin-bottom: 1px"
+            />
+            <p
+                id="errorTelefonoModalMessage"
+                style="margin-bottom: 20px; font-size: 20px"
+            ></p>
+            <button
+                onclick="cerrarErrorTelefonoModal()"
+                style="margin-top: 10px; margin-right: 4%; margin-left: 4%"
+            >
+                ACEPTAR
+            </button>
+        </div>
+    </div>
+
+    <div class="modal" id="errorIDModal">
+        <div class="modal-content">
+            <div class="top-bar">
+                <span
+                    onclick="cerrarErrorCorreoModal()"
+                    class="close-button"
+                    >&times;</span
+                >
+            </div>
+            <img
+                src="{% static 'img/error_ts.png' %}"
+                alt="ErrorTS"
+                style="width: 60px; height: 60px; margin-bottom: 1px"
+            />
+            <p
+                id="errorIDModalMessage"
+                style="margin-bottom: 20px; font-size: 20px"
+            ></p>
+            <button
+                onclick="cerrarErrorCorreoModal()"
+                style="margin-top: 10px; margin-right: 4%; margin-left: 4%"
+            >
+                ACEPTAR
+            </button>
+        </div>
+    </div>
+
+    <script>
+            var confirmarAdvertenciaRegistroModalButton =
+                document.getElementById(
+                    "confirmarAdvertenciaRegistroModal"
+                );
+            confirmarAdvertenciaRegistroModalButton.addEventListener(
+                "click",
+                function () {
+                    cerrarAdvertenciaRegistroModal();
+                    guardarRegistroCliente();
+                    mostrarModal(
+                        "<strong>Pago registrado exitosamente.</strong>",
+                        "exitoRegistroModal",
+                        "exitoRegistroModalMessage"
+                    );
+                }
+            );
+
+            var exitoRegistroAceptadoButton = document.getElementById(
+                "exitoRegistroAceptado"
+            );
+            exitoRegistroAceptadoButton.addEventListener(
+                "click",
+                function () {
+                    window.location.href = "/clientes";
+                }
+            );
+
+            var cancelarRegistroButton =
+                document.getElementById("cancelarRegistro");
+            cancelarRegistroButton.addEventListener("click", function () {
+                mostrarModal(
+                    "<strong>Está a punto de cancelar esta operación. ¿Desea continuar?</strong>",
+                    "advertenciaCancelarRegistroModal",
+                    "advertenciaCancelarRegistroModalMessage"
+                );
+            });
+
+            var advertenciaCancelarRegistroConfirmadoButton =
+                document.getElementById(
+                    "advertenciaCancelarRegistroConfirmado"
+                );
+            advertenciaCancelarRegistroConfirmadoButton.addEventListener(
+                "click",
+                function () {
+                    window.location.href = "/clientes";
+                }
+            );
+        
+
+        function mostrarModal(mensaje, modalId, mensajeModalId) {
+            var modalMessage = document.getElementById(mensajeModalId);
+            modalMessage.innerHTML = mensaje;
+            document.getElementById(modalId).style.display = "flex";
+        }
+
+        function cerrarExitoRegistroModal() {
+            window.location.href = "/clientes";
+        }
+
+        function cerrarAdvertenciaRegistroModal() {
+            document.getElementById(
+                "advertenciaRegistroModal"
+            ).style.display = "none";
+        }
+
+        function cerrarAdvertenciaCancelarRegistroModal() {
+            document.getElementById(
+                "advertenciaCancelarRegistroModal"
+            ).style.display = "none";
+        }
+
+        function cerrarErrorTelefonoModal() {
+            document.getElementById("errorTelefonoModal").style.display =
+                "none";
+        }
+
+        function cerrarErrorCorreoModal() {
+            document.getElementById("errorIDModal").style.display =
+                "none";
+        }
+
+        function cerrarRegistroExitosoModal() {
+                document.getElementById("registroExitosoModal").style.display = "none";
+                location.reload();
+            }
+
+        function guardarRegistroCliente() {
+            var form = document.getElementById("miFormulario");
+            var formData = new FormData(form);
+            var xhr = new XMLHttpRequest();
+            xhr.open("POST", "{% url 'clientes_registro' %}", true);
+            xhr.send(formData);
+        }
+    </script>
+
+</body>
+</html>
